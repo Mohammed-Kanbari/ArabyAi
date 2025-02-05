@@ -16,33 +16,15 @@ class _TopbarState extends State<Topbar> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: Row(
+      child: Row( 
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => Menu(),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(-1.0, 0.0); // Start from the right
-                    const end = Offset.zero; // End at the center
-                    const curve = Curves.easeInOut;
-
-                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    );
-                  },
-                ),
-              );
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Menu()));
             },
-            child: SvgPicture.asset(AppPhoto.menu),
-          ),
+            child: SvgPicture.asset(AppPhoto.menu)),
           Opacity(
             opacity: 0.6,
             child: Container(
@@ -62,12 +44,11 @@ class _TopbarState extends State<Topbar> {
             children: [
               SvgPicture.asset(AppPhoto.notication),
               Positioned(
-                left: 14,
-                child: CircleAvatar(
-                  radius: 4,
-                  backgroundColor: AppColors.primaryColor,
-                ),
-              ),
+                  left: 14,
+                  child: CircleAvatar(
+                    radius: 4,
+                    backgroundColor: AppColors.primaryColor,
+                  )),
             ],
           ),
         ],
