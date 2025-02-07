@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
-import 'package:my_araby_ai/type_of_contents/Email%20Page/E-mails_page.dart';
-import 'package:my_araby_ai/type_of_contents/SocailM%20Page/sm_main.dart';
-import 'package:my_araby_ai/type_of_contents/images_page.dart';
+import 'package:my_araby_ai/Screens//type_of_contents/Email%20Page/E-mails_page.dart';
+import 'package:my_araby_ai/Screens//type_of_contents/SocailM%20Page/sm_main.dart';
+import 'package:my_araby_ai/Screens//type_of_contents/images_page.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
 
 class HomePage extends StatefulWidget {

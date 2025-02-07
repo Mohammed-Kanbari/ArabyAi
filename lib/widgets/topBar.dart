@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_araby_ai/core/app_colors.dart';
 import 'package:my_araby_ai/core/photo_link.dart';
-import 'package:my_araby_ai/menu/menu.dart';
+import 'package:my_araby_ai/Screens/menu/menu.dart';
 
 class Topbar extends StatefulWidget {
   const Topbar({super.key});
@@ -47,7 +47,7 @@ class _TopbarState extends State<Topbar> {
                   left: 14,
                   child: CircleAvatar(
                     radius: 4,
-                    backgroundColor: AppColors.primaryColor,
+                    backgroundColor: AppColors.purple,
                   )),
             ],
           ),

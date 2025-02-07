@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
-import 'package:my_araby_ai/type_of_contents/Email%20Page/imrpve_email.dart';
+import 'package:my_araby_ai/Screens/type_of_contents/Email%20Page/imrpve_email.dart';
 import 'package:my_araby_ai/widgets/grid_items.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
 

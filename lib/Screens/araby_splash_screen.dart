@@ -10,18 +10,14 @@ class Araby_SC extends StatefulWidget {
   State<Araby_SC> createState() => _Araby_SCState();
 }
 
-
-
 class _Araby_SCState extends State<Araby_SC> {
-
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-
-    // Navigate to the Home page after animation ends (adjust duration accordingly)
-    Timer(Duration(seconds: 3), () {
+    // Navigate to the WelcomePage after 3 seconds
+    Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const WelcomePage()),
@@ -31,51 +27,66 @@ class _Araby_SCState extends State<Araby_SC> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+
+    return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color.fromARGB(255, 71, 201, 252),
-              const Color.fromARGB(255, 255, 255, 255)
+              Color.fromARGB(255, 71, 201, 252),
+              Color.fromARGB(255, 255, 255, 255)
             ],
             stops: [0.1, 0.5],
             begin: Alignment.topLeft,
-            end: Alignment.bottomRight)
+            end: Alignment.bottomRight,
+          ),
         ),
-        child: Stack(
-          children: [
-            Center(
-              child: Image.asset('assets/images/arabyLogo.png', width: 116, height: 130, alignment: Alignment(320, -390),),
-            ),
-
-            Align(
-              alignment: Alignment(0, 0.1),
-              child: ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [const Color.fromARGB(255, 71, 201, 252), const Color.fromARGB(255, 0, 132, 252)], // Gradient colors for text
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(height: screenHeight * 0.33,),
+              Image.asset(
+                'assets/images/arabyLogo.png',
+                width: screenWidth * 0.28,  // 30% of screen width
+                height: screenHeight * 0.2, // 20% of screen height
+                fit: BoxFit.contain,
+              ),
+              ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 71, 201, 252),
+                    Color.fromARGB(255, 0, 132, 252)
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ).createShader(bounds),
-                blendMode:BlendMode.srcIn,
-              child: Text(
-                'ARABY AI',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter' 
-                ),),
-            ),
-        )],
+                blendMode: BlendMode.srcIn,
+                child: Text(
+                  'ARABY AI',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.07,  // 8% of screen width
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            ],
+          ),
+
         ),
-      )
+      ),
     );
   }
 }

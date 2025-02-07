@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
 import 'package:my_araby_ai/core/constatns.dart';
-import 'package:my_araby_ai/menu/payment.dart';
-import 'package:my_araby_ai/menu/plans.dart';
-import 'package:my_araby_ai/menu/profile.dart';
+import 'package:my_araby_ai/Screens/menu/payment.dart';
+import 'package:my_araby_ai/Screens/menu/plans.dart';
+import 'package:my_araby_ai/Screens/menu/profile.dart';
 
 class Menu extends StatelessWidget {
   const Menu({super.key});
