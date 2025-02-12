@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/widgets/signin/signin_w3.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 
 class SingupW2 extends StatefulWidget {
   const SingupW2({super.key});
@@ -11,8 +13,6 @@ class SingupW2 extends StatefulWidget {
 class _SingupW2State extends State<SingupW2> {
 
 
-  final FocusNode _focusNode = FocusNode();
-  double _opacity = 0.5;
 
   // State to manage password visibility
   bool _isPasswordVisible = false;
@@ -20,22 +20,29 @@ class _SingupW2State extends State<SingupW2> {
   // Form key to validate form
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController _passwordController = TextEditingController();
+  final FocusNode _passwordFocusNode = FocusNode();
+  String _hintText = 'Minimum 8 characters';
+
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
+    // Add a listener to track focus changes
+    _passwordFocusNode.addListener(() {
       setState(() {
-        _opacity = _focusNode.hasFocus ? 1.0 : 0.5;
+        _hintText = _passwordFocusNode.hasFocus ? '' : 'Minimum 8 characters';
       });
     });
+    
 
     
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
     super.dispose();
+    _passwordController.dispose();
+    _passwordFocusNode.dispose();
   }
 
   @override
@@ -50,130 +57,141 @@ class _SingupW2State extends State<SingupW2> {
               FocusManager.instance.primaryFocus?.unfocus();
             },
             child: SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      
-                      SizedBox(height: 70,),
-                      
-            
-                      Image.asset('assets/images/Dot2.png', width: 40,),
-            
-            
-                      SizedBox(height: 20,),
-                      Text(
-                        'Now secure it with password',
-                        style: TextStyle(
-                            fontSize: 24,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    
+                    SizedBox(height: 80.h,),
+                    
+                          
+                    Image.asset('assets/images/Dot2.png', width: 40.w,),
+                          
+                          
+                    SizedBox(height: 20.h,),
+                    Text(
+                      'Now secure it with password',
+                      style: TextStyle(
+                          fontSize: 24.sp,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600),
+                    ),
+                    SizedBox(height: 15.h,),
+                    Text(
+                      'Please enter your a password',
+                      style: TextStyle(
+                          fontSize: 16.sp,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400),
+                    ),
+                    SizedBox(height: 20.h,),
+                          
+                    // Use Form and TextFormField to handle validation
+                    Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        controller: _passwordController,
+                        focusNode: _passwordFocusNode,
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
+                          hintText: _hintText,
+                          hintStyle: TextStyle(
+                            fontSize: 14.sp,
                             fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(height: 15,),
-                      Text(
-                        'Please enter your a password',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w400),
-                      ),
-                      SizedBox(height: 20,),
-            
-                      // Use Form and TextFormField to handle validation
-                      Form(
-                        key: _formKey,
-                        child: Opacity(
-                          opacity: _opacity,
-                          child: TextFormField(
-                            focusNode: _focusNode,
-                            obscureText: !_isPasswordVisible,
-                            decoration: InputDecoration(
-                              hintText: 'Minimum 8 characters',
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.blue, width: 2),
+                            fontWeight: FontWeight.w300
+                          ),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: const Color(0xFFC7C7C7))
                               ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _isPasswordVisible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
-                                },
-                              ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.blue,
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Password cannot be empty';
-                              }
-                              // Password validation logic
-                              if (value.length < 8 || value.length > 16) {
-                                return 'Password must be between 8 and 16 characters';
-                              }
-                              if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
-                                return 'Password must contain at least one lowercase letter';
-                              }
-                              if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
-                                return 'Password must contain at least one uppercase letter';
-                              }
-                              return null;
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
                             },
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password cannot be empty';
+                          }
+                          // Password validation logic
+                          if (value.length < 8 || value.length > 16) {
+                            return 'Password must be between 8 and 16 characters';
+                          }
+                          if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
+                            return 'Password must contain at least one lowercase letter';
+                          }
+                          if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+                            return 'Password must contain at least one uppercase letter';
+                          }
+                          return null;
+                        },
                       ),
-                      SizedBox(height: 20,),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                              colors: [
-                                Color.fromARGB(255, 71, 201, 252),
-                                Color.fromARGB(255, 0, 132, 252)
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight),
+                    ),
+                    SizedBox(height: 20.h,),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF3CC8EB),
+                              Color(0xFF1171D8)
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight),
+                      ),
+                      child: MaterialButton(
+                        onPressed: () {
+                          // Validate the form before navigating
+                          if (_formKey.currentState?.validate() ?? false) {
+                              Navigator.push(context, PageRouteBuilder(
+                              pageBuilder: (context, animation1, animation2)=>SingupW3(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero));
+                          }
+                        },
+                        minWidth: double.infinity,
+                        height: 45.h,
+                        child: Text(
+                          'Next',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.sp),
                         ),
-                        child: MaterialButton(
-                          onPressed: () {
-                            // Validate the form before navigating
-                            if (_formKey.currentState?.validate() ?? false) {
-                                Navigator.push(context, PageRouteBuilder(
-                                pageBuilder: (context, animation1, animation2)=>SingupW3(),
-                                transitionDuration: Duration.zero,
-                                reverseTransitionDuration: Duration.zero));
-                            }
-                          },
-                          minWidth: double.infinity,
-                          height: 45,
-                          child: Text(
-                            'Next',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 17),
+                      ),
+                    ),
+                    
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 15, bottom: 15),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/images/messageRobot2.png',
+                             width: 321.w, 
+                            height: 310.h, 
                           ),
                         ),
                       ),
-                      SizedBox(height: 45,),
-                      Container(
-                          padding: EdgeInsets.only(left: 50),
-                          child: Image.asset(
-                            'assets/images/messageRobot2.png',
-                            width: 350,
-                            height: 350,
-                          ))
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

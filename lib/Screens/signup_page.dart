@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/widgets/signin/signin_w2.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Singup extends StatefulWidget {
   const Singup({super.key});
@@ -9,25 +10,30 @@ class Singup extends StatefulWidget {
 }
 
 class _SingupState extends State<Singup> {
-  final FocusNode _focusNode = FocusNode();
-  double _opacity = 0.7;
+ 
 
   final _formKey = GlobalKey<FormState>();
+
+    final TextEditingController _emailController = TextEditingController();
+  final FocusNode _emaildFocusNode = FocusNode();
+  String _hintText = 'you@example.com';
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
+    _emaildFocusNode.addListener(() {
       setState(() {
-        _opacity = _focusNode.hasFocus ? 1.0 : 0.5;
+        _hintText = _emaildFocusNode.hasFocus ? '' : 'you@example.com';
       });
     });
+    
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
     super.dispose();
+    _emailController.dispose();
+    _emaildFocusNode.dispose();
   }
 
   @override
@@ -42,131 +48,141 @@ class _SingupState extends State<Singup> {
               FocusManager.instance.primaryFocus?.unfocus();
             },
             child: SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Image.asset('assets/images/cross.png', width: 32, height: 32,))
-                        ],
-                      ),
-                      SizedBox(height: 38),
-                      Image.asset(
-                        'assets/images/Dot1.png',
-                        width: 40,
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        'Hi there,',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      Text(
-                        'Please enter your e-mail address',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Form(
-                        key: _formKey,
-                        child: Opacity(
-                          opacity: _opacity,
-                          child: TextFormField(
-                            focusNode: _focusNode,
-                            decoration: InputDecoration(
-                              hintText: 'you@example.com',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.blue,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Email cannot be empty';
-                              }
-                              String emailPattern =
-                                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-                              RegExp regex = RegExp(emailPattern);
-                              if (!regex.hasMatch(value)) {
-                                return 'Enter a valid email address';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                            colors: [
-                              Color.fromARGB(255, 71, 201, 252),
-                              Color.fromARGB(255, 0, 132, 252),
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                        ),
-                        child: MaterialButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation1, animation2) =>
-                                      SingupW2(),
-                                  transitionDuration: Duration.zero,
-                                  reverseTransitionDuration: Duration.zero,
-                                ),
-                              );
-                            }
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
                           },
-                          minWidth: double.infinity,
-                          height: 45,
-                          child: Text(
-                            'Next',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 17,
+                          child: Image.asset('assets/images/cross.png', width: 32.w, height: 32.h,))
+                      ],
+                    ),
+                    SizedBox(height: 38.h),
+                    Image.asset(
+                      'assets/images/Dot1.png',
+                      width: 40.w,
+                    ),
+                    SizedBox(height: 20.h),
+                    Text(
+                      'Hi there,',
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 15.h),
+                    Text(
+                      'Please enter your e-mail address',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        controller: _emailController,
+                        focusNode: _emaildFocusNode,
+                        decoration: InputDecoration(
+                          hintText: _hintText,
+                          hintStyle: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w300
+                        ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: const Color(0xFFC7C7C7))
+                              ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.blue,
+                              width: 2.w,
                             ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email cannot be empty';
+                          }
+                          String emailPattern =
+                              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+                          RegExp regex = RegExp(emailPattern);
+                          if (!regex.hasMatch(value)) {
+                            return 'Enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF3CC8EB),
+                            Color(0xFF1171D8),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                      child: MaterialButton(
+                        onPressed: () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation1, animation2) =>
+                                    SingupW2(),
+                                transitionDuration: Duration.zero,
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            );
+                          }
+                        },
+                        minWidth: double.infinity,
+                        height: 45.h,
+                        child: Text(
+                          'Next',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),
-                      SizedBox(height: 45),
-                      // Dynamically resize the image
-                      Container(
-                        padding: EdgeInsets.only(left: 50),
-                        child: Image.asset(
-                          'assets/images/messageRobot.png',
-                          width: 350, 
-                          height: 359, 
+                    ),
+                    
+                    
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 15, bottom: 15),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/images/messageRobot.png',
+                             width: 321.w, 
+                            height: 310.h, 
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
