@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/Screens/HomePage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/Screens/araby_splash_screen.dart';
-import 'package:my_araby_ai/Screens/signup_page.dart';
-
 
 void main() {
   runApp(const AnApp());
 }
-
 
 class AnApp extends StatelessWidget {
   const AnApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Araby_SC(),
+    return ScreenUtilInit(
+      designSize: const Size(428, 926), // Ensure correct base size
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: child, // Pass the child
+        );
+      },
+      child: const Araby_SC(), // Wrap your main screen here
     );
   }
 }
+
 
 
 
