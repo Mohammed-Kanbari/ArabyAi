@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_araby_ai/core/app_colors.dart';
 import 'package:my_araby_ai/core/photo_link.dart';
@@ -28,13 +29,18 @@ class _TopbarState extends State<Topbar> {
           Opacity(
             opacity: 0.6,
             child: Container(
-              width: 290,
+              width: 284.w,
               height: 40,
               child: TextField(
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.only(top: 4),
-                    prefixIcon: Icon(Icons.search),
+                    contentPadding: EdgeInsets.all(4),
+                    prefixIcon: Icon(Icons.search, color: const Color(0xFFC7C7C7),),
                     hintText: 'Looking for something..',
+                    hintStyle: TextStyle(
+                      color: const Color(0xFFC7C7C7),
+                      fontFamily: 'Poppins',
+                      fontSize: 13.sp,
+                    ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8))),
               ),

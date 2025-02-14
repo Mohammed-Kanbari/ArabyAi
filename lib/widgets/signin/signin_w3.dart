@@ -78,6 +78,7 @@ class _SingupW3State extends State<SingupW3> {
                       focusNode: _usernameFocusNode,
                       controller: _usernameController, // Set controller
                       decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                         hintText: _hintText,
                         hintStyle: TextStyle(
                             fontSize: 14.sp,
@@ -139,7 +140,7 @@ class _SingupW3State extends State<SingupW3> {
                     ),
                     Flexible(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 15),
+                        padding: const EdgeInsets.only(left: 43, bottom: 15),
                         child: Align(
                           alignment: Alignment.center,
                           child: Image.asset(
