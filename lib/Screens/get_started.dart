@@ -19,8 +19,8 @@ class GetStarted extends StatelessWidget {
                   SizedBox(height: 50.h),
                   Image.asset('assets/images/arabyLogo.png',
                       width: 45.w, height: 50.h),
-                  const SizedBox(
-                    height: 20,
+                   SizedBox(
+                    height: 24.h,
                   ),
                   Text(
                     'Getting started',
@@ -30,7 +30,7 @@ class GetStarted extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 8.h),
                   Text(
                     'Create an account to continue !',
                     style: TextStyle(
@@ -39,7 +39,7 @@ class GetStarted extends StatelessWidget {
                         fontWeight: FontWeight.w400),
                   ),
                   SizedBox(
-                    height: 40.h,
+                    height: 41.h,
                   ),
                   Text(
                     '- USE - ',
@@ -49,7 +49,7 @@ class GetStarted extends StatelessWidget {
                         fontWeight: FontWeight.w400),
                   ),
                   SizedBox(
-                    height: 20.h,
+                    height: 25.h,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -62,8 +62,8 @@ class GetStarted extends StatelessWidget {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                   colors: [
-                                    Color.fromARGB(255, 71, 201, 252),
-                                    Color.fromARGB(255, 0, 132, 252)
+                                    Color(0xFF47C9FC),
+                                    Color(0xFF0084FC)
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight),
@@ -77,7 +77,7 @@ class GetStarted extends StatelessWidget {
                             ),
                           ),
                           SizedBox(
-                            height: 15,
+                            height: 14.h,
                           ),
                           Text(
                             'Phone',
@@ -96,8 +96,8 @@ class GetStarted extends StatelessWidget {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                   colors: [
-                                    Color.fromARGB(255, 71, 201, 252),
-                                    Color.fromARGB(255, 0, 132, 252)
+                                    Color(0xFF47C9FC),
+                                    Color(0xFF0084FC)
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight),
@@ -117,7 +117,7 @@ class GetStarted extends StatelessWidget {
                             ),
                           ),
                           SizedBox(
-                            height: 15.h,
+                            height: 14.h,
                           ),
                           Text(
                             'E-mail',
@@ -131,7 +131,7 @@ class GetStarted extends StatelessWidget {
                     ],
                   ),
                   SizedBox(
-                    height: 70.h,
+                    height: 77.h,
                   ),
                   Text(
                     '- OR -',
@@ -141,7 +141,7 @@ class GetStarted extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    height: 35.h,
+                    height: 40.h,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -226,7 +226,7 @@ class GetStarted extends StatelessWidget {
                             ],
                           ),
                           SizedBox(
-                            height: 10.h,
+                            height: 7.h,
                           ),
                           Padding(
                             padding: EdgeInsets.only(bottom: constraints.maxWidth*0.07),

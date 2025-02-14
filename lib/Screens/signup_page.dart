@@ -93,6 +93,7 @@ class _SingupState extends State<Singup> {
                         controller: _emailController,
                         focusNode: _emaildFocusNode,
                         decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                           hintText: _hintText,
                           hintStyle: TextStyle(
                           fontSize: 14.sp,
@@ -171,7 +172,7 @@ class _SingupState extends State<Singup> {
                     
                     Flexible(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 15),
+                        padding: const EdgeInsets.only(left: 43, bottom: 15),
                         child: Align(
                           alignment: Alignment.center,
                           child: Image.asset(

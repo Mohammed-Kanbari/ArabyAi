@@ -95,6 +95,7 @@ class _SingupW2State extends State<SingupW2> {
                         focusNode: _passwordFocusNode,
                         obscureText: !_isPasswordVisible,
                         decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                           hintText: _hintText,
                           hintStyle: TextStyle(
                             fontSize: 14.sp,
@@ -180,7 +181,7 @@ class _SingupW2State extends State<SingupW2> {
                     
                     Flexible(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15, bottom: 15),
+                        padding: const EdgeInsets.only(left: 43, bottom: 15),
                         child: Align(
                           alignment: Alignment.center,
                           child: Image.asset(

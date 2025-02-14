@@ -93,8 +93,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   borderRadius: BorderRadius.circular(10),
                   gradient: LinearGradient(
                       colors: [
-                        Color.fromARGB(255, 71, 201, 252),
-                        Color.fromARGB(255, 0, 132, 252)
+                        Color(0xFF3CC8EB),
+                        Color(0xFF1171D8)
                       ],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight)),

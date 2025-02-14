@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 
 class Explore extends StatelessWidget {
   final String username;
@@ -14,11 +16,11 @@ class Explore extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
       
-          SizedBox(height: 200,),
+          SizedBox(height: 160.h,),
       
-          Image.asset('assets/images/verify-security.png', width: 271, height: 260,),
+          Image.asset('assets/images/verify-security.png', width: 271.w, height: 260.h,),
       
-          SizedBox(height: 90,),
+          SizedBox(height: 80.h,),
       
       
           Padding(
@@ -43,12 +45,12 @@ class Explore extends StatelessWidget {
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: const Color.fromARGB(255, 6, 114, 202)
+                      color: const Color(0xFF1171D8)
 
                     )
                   ),
                   TextSpan(
-                    text: 'Your email has been verified successfully in our system',
+                    text: 'Your email has been verified successfully in our system.',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
@@ -63,7 +65,7 @@ class Explore extends StatelessWidget {
           
       
         
-          SizedBox(height: 137,),
+          SizedBox(height: 169,),
       
           Padding(
             padding: EdgeInsets.only(left: 20, right: 20),
@@ -72,8 +74,8 @@ class Explore extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         gradient: LinearGradient(
                           colors: [
-                            Color.fromARGB(255, 71, 201, 252),
-                            Color.fromARGB(255, 0, 132, 252)
+                            Color(0xFF3CC8EB),
+                            Color(0xFF1171D8)
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight),
@@ -85,20 +87,17 @@ class Explore extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => HomePage()));
                         },
                         minWidth: double.infinity,
-                        height: 45,
+                        height: 44.h,
                         child: Text(
                           'Explore Now',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
-                              fontSize: 17),
+                              fontSize: 14.sp),
                         ),
                       ),
                     ),
           ),
-
-          SizedBox(height: 25,),
-
           
       
         ],
