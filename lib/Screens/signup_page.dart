@@ -162,6 +162,7 @@ class _SingupState extends State<Singup> {
                           'Next',
                           style: TextStyle(
                             color: Colors.white,
+                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w800,
                             fontSize: 14.sp,
                           ),

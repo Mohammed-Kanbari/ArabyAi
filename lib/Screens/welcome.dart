@@ -62,7 +62,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                   Positioned(
-                    top: constraints.maxHeight * 0.55,
+                    top: screenHeight * 0.55,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(3, (index) {

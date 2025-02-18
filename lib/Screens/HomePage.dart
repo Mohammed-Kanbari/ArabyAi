@@ -228,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Container(
                       alignment: Alignment.center,
-                      width: 380.w,
+                      width: double.infinity,
                       decoration: BoxDecoration(
                           gradient: LinearGradient(
                               colors: [
