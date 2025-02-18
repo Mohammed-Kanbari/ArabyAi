@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SmFacebook extends StatefulWidget {
   const SmFacebook({super.key});
@@ -9,15 +10,12 @@ class SmFacebook extends StatefulWidget {
 }
 
 class _SmFacebookState extends State<SmFacebook> {
-
   final List<String> _languages = ['English', 'Arabic'];
   final List<String> _tone = ['Professional', 'Casual', 'Friendly', 'Formal'];
-
 
   final TextEditingController postAbout_Controller = TextEditingController();
   final TextEditingController recipient_Controller = TextEditingController();
 
-  
   bool isButtononEnabled = false;
 
   String? _selectedLanguage = 'English';
@@ -25,9 +23,7 @@ class _SmFacebookState extends State<SmFacebook> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
     postAbout_Controller.addListener(_validateFields);
   }
 
@@ -38,9 +34,8 @@ class _SmFacebookState extends State<SmFacebook> {
   }
 
   void _validateFields() {
-    final bool isFormValid = 
-    postAbout_Controller.text.isNotEmpty &&
-    _selectedTone != null;
+    final bool isFormValid =
+        postAbout_Controller.text.isNotEmpty && _selectedTone != null;
 
     setState(() {
       isButtononEnabled = isFormValid;
@@ -53,216 +48,212 @@ class _SmFacebookState extends State<SmFacebook> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       body: GestureDetector(
-        onTap: (){
+        onTap: () {
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: SafeArea(
-            child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 27.h),
                 Row(
                   children: [
-                    IconButton(onPressed: () {
-                      Navigator.pop(context);
-                    }, icon: Icon(Icons.arrow_back_ios)),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.arrow_back_ios, size: 24.sp)),
                     Text(
                       'Facebook Status',
                       style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600),
-                    )
+                    ),
                   ],
                 ),
                 kGap25,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Please select the language :',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400),
-                    ),
-                    kGap10,
-                    DropdownButtonFormField(
-                      dropdownColor: Colors.white,
-                      value: _selectedLanguage,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedLanguage = newValue;
-                        });
-                        _validateFields();
-                      },
-                      items: _languages
-                          .map((language) => DropdownMenuItem(
-                              value: language, child: Text(language)))
-                          .toList(),
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Please select the language :',
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400),
+                        ),
+                        kGap10,
+                        DropdownButtonFormField(
+                          dropdownColor: Colors.white,
+                          value: _selectedLanguage,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedLanguage = newValue;
+                            });
+                            _validateFields();
+                          },
+                          items: _languages
+                              .map((language) => DropdownMenuItem(
+                                  value: language,
+                                  child: Text(
+                                    language,
+                                    style: TextStyle(
+                                        fontFamily: 'Poppins', fontSize: 16.sp),
+                                  )))
+                              .toList(),
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 180, 179, 179),
+                                      width: 1)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFFC7C7C7))),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 1))),
+                        ),
+                        kGap25,
+                        Text(
+                          'What would you like to post about ?',
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400),
+                        ),
+                        kGap10,
+                        TextField(
+                          controller: postAbout_Controller,
+                          textAlignVertical: TextAlignVertical.top,
+                          maxLines: null,
+                          expands: false,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            hintText: 'Type here..',
+                            hintStyle: TextStyle(
+                                color: const Color.fromARGB(255, 183, 182, 182),
+                                fontSize: 14.sp,
+                                fontFamily: 'Poppins'),
+                            border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 180, 179, 179),
-                                  width: 1)),
-                          contentPadding: EdgeInsets.all(10),
-                          enabledBorder: OutlineInputBorder(
+                                  color: const Color.fromARGB(255, 180, 179, 179),
+                                  width: 1),
+                            ),
+                            enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 195, 194, 194))),
-                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: const Color(0xFFC7C7C7)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide:
-                                  BorderSide(color: Colors.blueAccent, width: 1))),
-                    ),                
-            
-                    kGap25,
-            
-                    Text(
-                      'What would you like to post about ?',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400),
-                    ),
-                    kGap10,
-                    TextField(
-                      controller: postAbout_Controller,
-                      textAlignVertical: TextAlignVertical.top,
-                      maxLines: null,
-                      expands: false,
-                      decoration: InputDecoration(
-                          hintText: 'Type here..',
-                          hintStyle: TextStyle(
-                              color: const Color.fromARGB(255, 183, 182, 182),
-                              fontSize: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                                color: const Color.fromARGB(255, 180, 179, 179),
-                                width: 1),
+                                  BorderSide(color: Colors.blueAccent, width: 1),
+                            ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                                color: const Color.fromARGB(255, 195, 194, 194)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: Colors.blueAccent, width: 1),
-                          ),
-                          contentPadding: EdgeInsets.all(10)),
-                    ),
-            
-                    kGap25,
-            
-                    Text(
-                      'How do you want the caption to sound ?',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400),
-                    ),
-                    kGap10,
-                    DropdownButtonFormField(
-                      dropdownColor: Colors.white,
-                      value: _selectedTone,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedTone = newValue;
-                        });
-                        _validateFields();
-                      },
-                      items: _tone
-                          .map((tone) => DropdownMenuItem(
-                              value: tone, child: Text(tone)))
-                          .toList(),
+                        ),
+                        kGap25,
+                        Text(
+                          'How do you want the caption to sound ?',
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w400),
+                        ),
+                        kGap10,
+                        DropdownButtonFormField(
+                          dropdownColor: Colors.white,
+                          value: _selectedTone,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedTone = newValue;
+                            });
+                            _validateFields();
+                          },
+                          items: _tone
+                              .map((tone) => DropdownMenuItem(
+                                  value: tone,
+                                  child: Text(tone,
+                                      style: TextStyle(
+                                          fontFamily: 'Poppins', fontSize: 16.sp))))
+                              .toList(),
                           hint: Text(
                             'Select tone',
                             style: TextStyle(
-                              fontSize: 14,
-                              color: const Color.fromARGB(255, 183, 182, 182)
-                            ),
+                                fontSize: 14.sp,
+                                fontFamily: 'Poppins',
+                                color: const Color.fromARGB(255, 183, 182, 182)),
                           ),
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 180, 179, 179),
-                                  width: 1)),
-                          contentPadding: EdgeInsets.all(10),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 195, 194, 194))),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide:
-                                  BorderSide(color: Colors.blueAccent, width: 1))),
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 180, 179, 179),
+                                      width: 1)),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 195, 194, 194))),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 1))),
+                        ),
+                        SizedBox(height: 40.h), // Adds space before button
+                      ],
                     ),
-                    kGap60,
-                    kGap20,
-                    kGap60,
-                    kGap60,
-                    kGap60,
-                    kGap60,
-                    kGap50,
-                
-            
-                    Container(
-                      width: double.infinity,
-                      decoration: isButtononEnabled ? BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color.fromARGB(255, 71, 201 , 252), Color.fromARGB(255, 0, 132, 252)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight), 
-                          borderRadius: BorderRadius.circular(10)
-                      ) : BoxDecoration(
-                        color: const Color.fromARGB(0, 238, 238, 238), 
-                        borderRadius: BorderRadius.circular(10)
-                                    
-                      ),
-                      child: ElevatedButton(
-                        onPressed: isButtononEnabled ? (){
-                      
-                        } : null,
-                        style: ElevatedButton.styleFrom(
+                  ),
+                ),
+                // Button always stays at the bottom
+                Container(
+                  width: double.infinity,
+                  decoration: isButtononEnabled
+                      ? BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [Color(0xFF3CC8EB), Color(0xFF1171D8)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight),
+                          borderRadius: BorderRadius.circular(10))
+                      : BoxDecoration(
+                          color: const Color.fromARGB(0, 238, 238, 238),
+                          borderRadius: BorderRadius.circular(10)),
+                  child: ElevatedButton(
+                      onPressed: isButtononEnabled ? () {} : null,
+                      style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(0, 255, 255, 255),
                           shadowColor: Colors.transparent,
-                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 130),
+                          padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)
-                          )
-                        ),
-                        child: Text(
-                          'Generate',
-                          style: TextStyle(
-                            fontSize: 14,
+                              borderRadius: BorderRadius.circular(10))),
+                      child: Text(
+                        'Generate',
+                        style: TextStyle(
+                            fontSize: 14.sp,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
-                            color: isButtononEnabled ? Colors.white 
-                            :  const Color.fromARGB(121, 182, 174, 174)
-                          ),
-                          )
-                        ),
-                    )
-            
-            
-                  ],
+                            color: isButtononEnabled
+                                ? Colors.white
+                                : const Color.fromARGB(121, 182, 174, 174)),
+                      )),
                 ),
-            
-            
-            
-            
+                SizedBox(height: 30.h,)
               ],
             ),
           ),
-        )),
+        ),
       ),
     );
   }

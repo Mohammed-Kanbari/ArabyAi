@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 
 class Payment extends StatefulWidget {
   const Payment({super.key});
@@ -23,10 +25,10 @@ class _PaymentState extends State<Payment> {
           clipBehavior: Clip.none,
           children: [
             Container(
-              height: 246,
+              height: 246.h,
               decoration: BoxDecoration(
                 color: cardColor,
-                borderRadius: BorderRadius.circular(26),
+                borderRadius: BorderRadius.circular(24),
               ),
             ),
             Positioned(
@@ -34,39 +36,38 @@ class _PaymentState extends State<Payment> {
               bottom: 0,
               child: Image.asset(
                 'assets/images/cardimage.png',
-                width: 200,
-                height: 200,
+                width: 200.w,
+                height: 200.h,
               ),
             ),
             Positioned.fill(
               child: Padding(
-                padding: const EdgeInsets.all(25.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,                  
                   children: [
                     Text(
                       cardHolderName,
                       style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Poppins',
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.w600),
                     ),
-                    SizedBox(height: 100),
+                  Spacer(),
                     Text(
                       cardNumber,
                       style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           fontFamily: 'Poppins'),
                     ),
-                    Spacer(),
+                    SizedBox(height: 10.h,),
                     Align(
                       alignment: Alignment(-0.8, 0),
                       child: Image.asset(
                         logoPath,
-                        width: 58,
+                        width: 58.w,
                       ),
                     ),
                   ],
@@ -76,7 +77,7 @@ class _PaymentState extends State<Payment> {
           ],
         ),
         SizedBox(
-          height: 15,
+          height: 15.h,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,7 +85,7 @@ class _PaymentState extends State<Payment> {
           children: [
             Text(
               "Set as a primary payment",
-              style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 14.sp),
             ),
             Switch(
               value: isPrimary,
@@ -112,10 +113,9 @@ class _PaymentState extends State<Payment> {
       backgroundColor: Colors.white,
       body: SafeArea(
           child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.only(right: 20, left: 20, top: 10, bottom: 3),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -123,7 +123,7 @@ class _PaymentState extends State<Payment> {
                 Text(
                   'Payment',
                   style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 24.sp,
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600),
                 ),
@@ -133,13 +133,13 @@ class _PaymentState extends State<Payment> {
                   },
                   child: Image.asset(
                     'assets/images/cross.png',
-                    width: 32,
-                    height: 32,
+                    width: 32.w,
+                    height: 32.h,
                   ),
                 )
               ],
             ),
-            kGap30,
+            SizedBox(height: 30.h),
             Expanded(
               child: ListView(
                 children: [
@@ -147,7 +147,7 @@ class _PaymentState extends State<Payment> {
                     "CARD HOLDER FULL NAME",
                     "123 ********8790",
                     "assets/images/visa.png",
-                    const Color.fromARGB(255, 103, 164, 230),
+                    const Color(0xFF67A4E6),
                     isPrimary1,
                     (value) {
                       setState(() {
@@ -156,7 +156,7 @@ class _PaymentState extends State<Payment> {
                       });
                     },
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 30.h),
                   _buildPaymentCard(
                     "CARD HOLDER FULL NAME",
                     "123 ********8790",
@@ -177,20 +177,21 @@ class _PaymentState extends State<Payment> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 gradient: LinearGradient(colors: [
-                  Color.fromARGB(255, 71, 201, 252),
-                  Color.fromARGB(255, 0, 132, 252)
+                  Color(0xFF3CC8EB),
+                  Color(0xFF1171D8)
                 ], begin: Alignment.centerLeft, end: Alignment.centerRight),
               ),
               child: MaterialButton(
                 onPressed: () {},
                 minWidth: double.infinity,
-                height: 45,
+                height: 45.h,
                 child: Text(
                   'Done',
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
-                      fontSize: 14),
+                      fontFamily: 'Poppins',
+                      fontSize: 14.sp),
                 ),
               ),
             ),
@@ -199,8 +200,8 @@ class _PaymentState extends State<Payment> {
               Text(
                 "Have a problem? ",
                 style: TextStyle(
-                    fontSize: 14,
-                    color: const Color.fromARGB(201, 49, 47, 47),
+                    fontSize: 14.sp,
+                    color: const Color(0xFF757575),
                     fontFamily: 'Poppins'),
               ),
               InkWell(
@@ -208,7 +209,8 @@ class _PaymentState extends State<Payment> {
                   child: Text(
                     ' Contact us',
                     style: TextStyle(
-                        color: const Color.fromARGB(255, 108, 213, 240),
+                      fontSize: 14.sp,
+                        color: const Color(0xFF3CC8EB),
                         fontWeight: FontWeight.w700,
                         fontFamily: 'Poppins'),
                   )),

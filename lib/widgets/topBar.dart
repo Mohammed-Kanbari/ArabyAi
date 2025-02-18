@@ -26,23 +26,28 @@ class _TopbarState extends State<Topbar> {
                   MaterialPageRoute(builder: (context) => Menu()));
             },
             child: SvgPicture.asset(AppPhoto.menu)),
-          Opacity(
-            opacity: 0.6,
-            child: Container(
-              width: 284.w,
-              height: 40,
-              child: TextField(
-                decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(4),
-                    prefixIcon: Icon(Icons.search, color: const Color(0xFFC7C7C7),),
-                    hintText: 'Looking for something..',
-                    hintStyle: TextStyle(
-                      color: const Color(0xFFC7C7C7),
-                      fontFamily: 'Poppins',
-                      fontSize: 13.sp,
-                    ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8))),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Opacity(
+                opacity: 0.6,
+                child: Container(
+                  width: 284.w,
+                  height: 40,
+                  child: TextField(
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(4),
+                        prefixIcon: Icon(Icons.search, color: const Color(0xFFC7C7C7),),
+                        hintText: 'Looking for something..',
+                        hintStyle: TextStyle(
+                          color: const Color(0xFFC7C7C7),
+                          fontFamily: 'Poppins',
+                          fontSize: 13.sp,
+                        ),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8))),
+                  ),
+                ),
               ),
             ),
           ),

@@ -38,6 +38,7 @@ dependencies:
   gap: ^3.0.1
   flutter_svg: ^2.0.17
   flutter_screenutil: ^5.9.3
+  device_preview: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +74,8 @@ flutter:
     - assets/images/
     - assets/home_imgs/
     - assets/svg/
+    - assets/email_imgs/
+    - assets/social_imgs/
     
  
 

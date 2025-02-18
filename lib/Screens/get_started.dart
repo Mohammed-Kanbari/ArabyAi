@@ -179,88 +179,85 @@ class GetStarted extends StatelessWidget {
                     ],
                   ),
                   Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'By Registering you agree to our ',
+                              style: TextStyle(
+                                  fontSize:constraints.maxWidth > 400 ? 12.sp : 9.sp,
+                                  color: const Color.fromARGB(202, 0, 0, 0),
+                                  fontFamily: 'Poppins'),
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Text(
+                                  'Terms of Use',
+                                  style: TextStyle(
+                                      color:
+                                          const Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                      fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp),
+                                )),
+                            Text(
+                              ' and ',
+                              style: TextStyle(
+                                  fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp,
+                                  color: const Color.fromARGB(202, 0, 0, 0),
+                                  fontFamily: 'Poppins'),
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Text(
+                                  'Privacy Policy',
+                                  style: TextStyle(
+                                      color:
+                                          const Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                      fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp),
+                                )),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 7.h,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(bottom: constraints.maxWidth*0.07),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'By Registering you agree to our ',
+                                'Already have and account?',
                                 style: TextStyle(
-                                    fontSize:constraints.maxWidth > 400 ? 12.sp : 9.sp,
-                                    color: const Color.fromARGB(202, 0, 0, 0),
+                                    fontSize: 14.sp,
+                                    color: const Color(0xFF757575),
                                     fontFamily: 'Poppins'),
                               ),
                               InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Login()),
+                                    );
+                                  },
                                   child: Text(
-                                    'Terms of Use',
+                                    ' Log in',
                                     style: TextStyle(
-                                        color:
-                                            const Color.fromARGB(255, 0, 0, 0),
+                                        color: const Color(0xFF3CC8EB),
                                         fontWeight: FontWeight.w700,
                                         fontFamily: 'Poppins',
-                                        fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp),
-                                  )),
-                              Text(
-                                ' and ',
-                                style: TextStyle(
-                                    fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp,
-                                    color: const Color.fromARGB(202, 0, 0, 0),
-                                    fontFamily: 'Poppins'),
-                              ),
-                              InkWell(
-                                  onTap: () {},
-                                  child: Text(
-                                    'Privacy Policy',
-                                    style: TextStyle(
-                                        color:
-                                            const Color.fromARGB(255, 0, 0, 0),
-                                        fontWeight: FontWeight.w700,
-                                        fontFamily: 'Poppins',
-                                        fontSize: constraints.maxWidth > 400 ? 12.sp : 9.sp),
-                                  )),
+                                        fontSize: 14.sp),
+                                  ))
                             ],
                           ),
-                          SizedBox(
-                            height: 7.h,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: constraints.maxWidth*0.07),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Already have and account?',
-                                  style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: const Color(0xFF757575),
-                                      fontFamily: 'Poppins'),
-                                ),
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Login()),
-                                      );
-                                    },
-                                    child: Text(
-                                      ' Log in',
-                                      style: TextStyle(
-                                          color: const Color(0xFF3CC8EB),
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.sp),
-                                    ))
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
+                        )
+                      ],
                     ),
                   ),
                 ],

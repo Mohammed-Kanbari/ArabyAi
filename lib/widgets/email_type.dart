@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ImageTextButton extends StatelessWidget {
+class EmailType extends StatelessWidget {
   final String imagePath;  // Image path to be passed as parameter
   final String text;       // Text to be passed as parameter
   final VoidCallback onTap;  // Function to execute when tapped
 
-  const ImageTextButton({
+  const EmailType({
     Key? key,
     required this.imagePath,
     required this.text,
@@ -26,7 +26,7 @@ class ImageTextButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 3), // Adjust the padding as needed
         decoration: BoxDecoration(
           color: Colors.white, // Background color of the container
-          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderRadius: BorderRadius.circular(16), // Rounded corners
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2), // Shadow color
@@ -36,31 +36,27 @@ class ImageTextButton extends StatelessWidget {
             ),
           ],
         ),
-        child: LayoutBuilder (builder: (context, constraints) {
-          
-        
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                imagePath, // Display image passed as parameter
-                width: constraints.maxWidth * 0.4, // You can adjust the size here
-                height: constraints.maxHeight * 0.4,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              imagePath, // Display image passed as parameter
+              width: 58.w, // You can adjust the size here
+              height: 64.h,
+            ),
+            SizedBox(height: 8.h), // Space between image and text
+            Text(
+              text, // Display text passed as parameter
+              style: TextStyle(
+                fontSize: screenWidth > 400 ? 14.sp : 12.sp,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'Poppins',
               ),
-              SizedBox(height: 8.h), // Space between image and text
-              Text(
-                text, // Display text passed as parameter
-                style: TextStyle(
-                  fontSize: constraints.maxWidth * 0.1,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Poppins',
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          );
-   } ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
