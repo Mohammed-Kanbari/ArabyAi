@@ -17,7 +17,7 @@ class SocialType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    final screenWidth = MediaQuery.sizeOf(context).width;
     return GestureDetector(
       onTap: onTap, // Trigger the onTap function passed as parameter
       child: Container(
@@ -36,7 +36,7 @@ class SocialType extends StatelessWidget {
           ],
         ),
         child: LayoutBuilder (builder: (context, constraints) {
-          
+          double containerWidth = constraints.maxWidth;
         
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -44,14 +44,14 @@ class SocialType extends StatelessWidget {
             children: [
               Image.asset(
                 imagePath, // Display image passed as parameter
-                width: constraints.maxWidth * 0.6, // You can adjust the size here
-                height: constraints.maxHeight * 0.6,
+                width: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.6, // You can adjust the size here
+                height: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.6,
               ),
               SizedBox(height: 8.h), // Space between image and text
               Text(
                 text, // Display text passed as parameter
                 style: TextStyle(
-                  fontSize: constraints.maxWidth * 0.11,
+                  fontSize: screenWidth > 650 ? containerWidth * 0.08 : containerWidth * 0.11,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Poppins',
                 ),

@@ -12,22 +12,17 @@ class AnApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevicePreview(
-      enabled: true,
-      builder: (context) {
-      return ScreenUtilInit(
-        designSize: const Size(428, 926), // Ensure correct base size
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: child, // Pass the child
-          );
-        },
-        child: const Araby_SC(), // Wrap your main screen here
-      );
-      }
+    return ScreenUtilInit(
+      designSize: const Size(428, 926), // Ensure correct base size
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: child, // Pass the child
+        );
+      },
+      child: const Araby_SC(), // Wrap your main screen here
     );
   }
 }

@@ -36,27 +36,31 @@ class EmailType extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset(
-              imagePath, // Display image passed as parameter
-              width: 58.w, // You can adjust the size here
-              height: 64.h,
-            ),
-            SizedBox(height: 8.h), // Space between image and text
-            Text(
-              text, // Display text passed as parameter
-              style: TextStyle(
-                fontSize: screenWidth > 400 ? 14.sp : 12.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Poppins',
+        child: LayoutBuilder (builder: (context, constraints) {
+          double containerWidth = constraints.maxWidth;
+        
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                imagePath, // Display image passed as parameter
+                width: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.4, // You can adjust the size here
+                height: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.4,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+              SizedBox(height: 8.h), // Space between image and text
+              Text(
+                text, // Display text passed as parameter
+                style: TextStyle(
+                  fontSize: screenWidth > 650 ? containerWidth * 0.07 : containerWidth * 0.08,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          );
+  }),
       ),
     );
   }
