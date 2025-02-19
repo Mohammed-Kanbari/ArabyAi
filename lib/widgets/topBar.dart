@@ -30,7 +30,7 @@ class _TopbarState extends State<Topbar> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Opacity(
-                opacity: 0.6,
+                opacity: 0.7,
                 child: Container(
                   width: 284.w,
                   height: 40,

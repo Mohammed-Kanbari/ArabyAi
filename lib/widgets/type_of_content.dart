@@ -22,7 +22,6 @@ class ImageTextButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap, // Trigger the onTap function passed as parameter
       child: Container(
-        
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 3), // Adjust the padding as needed
         decoration: BoxDecoration(
           color: Colors.white, // Background color of the container
@@ -37,7 +36,7 @@ class ImageTextButton extends StatelessWidget {
           ],
         ),
         child: LayoutBuilder (builder: (context, constraints) {
-          
+          double containerWidth = constraints.maxWidth;
         
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -45,14 +44,14 @@ class ImageTextButton extends StatelessWidget {
             children: [
               Image.asset(
                 imagePath, // Display image passed as parameter
-                width: constraints.maxWidth * 0.4, // You can adjust the size here
-                height: constraints.maxHeight * 0.4,
+                width: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.4, // You can adjust the size here
+                height: screenWidth > 650 ? containerWidth * 0.3 : containerWidth * 0.4,
               ),
               SizedBox(height: 8.h), // Space between image and text
               Text(
                 text, // Display text passed as parameter
                 style: TextStyle(
-                  fontSize: constraints.maxWidth * 0.1,
+                  fontSize: screenWidth > 650 ? containerWidth * 0.08 : containerWidth * 0.1,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Poppins',
                 ),

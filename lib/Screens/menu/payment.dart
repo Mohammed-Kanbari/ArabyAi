@@ -170,10 +170,8 @@ class _PaymentState extends State<Payment> {
                       });
                     },
                   ),
-                ],
-              ),
-            ),
-            Container(
+                  SizedBox(height: 35.h,),
+                  Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 gradient: LinearGradient(colors: [
@@ -215,6 +213,10 @@ class _PaymentState extends State<Payment> {
                         fontFamily: 'Poppins'),
                   )),
             ]),
+                ],
+              ),
+            ),
+            
           ],
         ),
       )),
