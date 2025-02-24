@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_araby_ai/core/constatns.dart';
@@ -15,6 +17,35 @@ class _ProfileState extends State<Profile> {
   String? selectedNum = 'UAE +971';
 
   final List<String> _Numbers = ['UAE +971', 'USA +01', 'UK +671'];
+
+  // Variables to hold username and email
+  String? username = '';
+  String? email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Get the user data from Firestore when the profile page is loaded
+    _getUserData();
+  }
+
+  // Function to get user data from Firestore
+  Future<void> _getUserData() async {
+    // Get the current user's ID
+    User? user = FirebaseAuth.instance.currentUser;
+    
+    if (user != null) {
+      // Fetch the data from Firestore using the user's ID
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+      
+      if (userDoc.exists) {
+        setState(() {
+          username = userDoc['name'];
+          email = userDoc['email'];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +169,7 @@ class _ProfileState extends State<Profile> {
                         ),
                         kGap10,
                         TextField(
+                          controller: TextEditingController(text: username),
                           style: TextStyle(fontFamily: 'Poppins', fontSize: 16.sp),
                           textAlignVertical: TextAlignVertical.top,
                           maxLines: null,
@@ -175,6 +207,7 @@ class _ProfileState extends State<Profile> {
                         ),
                         kGap10,
                         TextField(
+                          controller: TextEditingController(text: email),
                           enabled: false,
                           textAlignVertical: TextAlignVertical.top,
                           maxLines: null,

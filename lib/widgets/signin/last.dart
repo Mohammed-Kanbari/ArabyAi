@@ -1,12 +1,66 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
-class Explore extends StatelessWidget {
-  final String username;
-  const Explore({required this.username, Key? key}): super(key: key);
+class Explore extends StatefulWidget {
+  const Explore({super.key});
 
+  @override
+  State<Explore> createState() => _ExploreState();
+}
+
+class _ExploreState extends State<Explore> {
+   String username = ""; // Default value
+
+  @override
+  void initState() {
+    super.initState();
+    _getUsername(); // Fetch username when the widget initializes
+  }
+
+  Future<void> _getUsername() async {
+    try {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
+
+    // Fetch the document for the current user using their UID
+    DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
+
+    if (userDoc.exists) {
+      // Get the username from the document
+      setState(() {
+        username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+      });
+    } else {
+      setState(() {
+        username = "User"; // Default username if document doesn't exist
+      });
+    }
+  } catch (e) {
+    print("Error fetching username: $e");
+    setState(() {
+      username = "User"; // Default username if there's an error
+    });
+  }
+}
+
+
+
+
+
+
+
+    // Function to retrieve username from SharedPreferences
+  // Future<void> _getUsername() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     username = prefs.getString('username') ?? "User"; // Default if no username found
+  //   });
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

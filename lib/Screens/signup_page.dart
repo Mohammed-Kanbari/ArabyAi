@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/widgets/signin/signin_w2.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Singup extends StatefulWidget {
   const Singup({super.key});
@@ -10,11 +11,8 @@ class Singup extends StatefulWidget {
 }
 
 class _SingupState extends State<Singup> {
- 
-
   final _formKey = GlobalKey<FormState>();
-
-    final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final FocusNode _emaildFocusNode = FocusNode();
   String _hintText = 'you@example.com';
 
@@ -26,7 +24,6 @@ class _SingupState extends State<Singup> {
         _hintText = _emaildFocusNode.hasFocus ? '' : 'you@example.com';
       });
     });
-    
   }
 
   @override
@@ -36,15 +33,36 @@ class _SingupState extends State<Singup> {
     _emaildFocusNode.dispose();
   }
 
+  Future<void> _goToNextPage() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Get the email entered by the user
+      String email = _emailController.text.trim();
+
+      // Here, you can optionally save the email locally or proceed to the next page.
+      
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('user_email', email);
+      // For now, just move to the next page (password page).
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) => SingupW2(email: email),  // Pass email to next page
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
-          resizeToAvoidBottomInset: true,  
+          resizeToAvoidBottomInset: true,
           backgroundColor: Colors.white,
           body: GestureDetector(
-            onTap: (){
+            onTap: () {
               FocusManager.instance.primaryFocus?.unfocus();
             },
             child: SafeArea(
@@ -60,7 +78,8 @@ class _SingupState extends State<Singup> {
                           onTap: () {
                             Navigator.pop(context);
                           },
-                          child: Image.asset('assets/images/cross.png', width: 32.w, height: 32.h,))
+                          child: Image.asset('assets/images/cross.png', width: 32.w, height: 32.h),
+                        )
                       ],
                     ),
                     SizedBox(height: 38.h),
@@ -96,17 +115,16 @@ class _SingupState extends State<Singup> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                           hintText: _hintText,
                           hintStyle: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w300
-                        ),
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w300),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                           enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: const Color(0xFFC7C7C7))
-                              ),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: const Color(0xFFC7C7C7)),
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                               color: Colors.blue,
@@ -143,19 +161,7 @@ class _SingupState extends State<Singup> {
                         ),
                       ),
                       child: MaterialButton(
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder: (context, animation1, animation2) =>
-                                    SingupW2(),
-                                transitionDuration: Duration.zero,
-                                reverseTransitionDuration: Duration.zero,
-                              ),
-                            );
-                          }
-                        },
+                        onPressed: _goToNextPage,
                         minWidth: double.infinity,
                         height: 45.h,
                         child: Text(
@@ -169,8 +175,6 @@ class _SingupState extends State<Singup> {
                         ),
                       ),
                     ),
-                    
-                    
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 43, bottom: 15),
@@ -178,8 +182,8 @@ class _SingupState extends State<Singup> {
                           alignment: Alignment.center,
                           child: Image.asset(
                             'assets/images/messageRobot.png',
-                             width: 321.w, 
-                            height: 310.h, 
+                            width: 321.w,
+                            height: 310.h,
                           ),
                         ),
                       ),

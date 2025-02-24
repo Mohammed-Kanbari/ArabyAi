@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
 import 'package:my_araby_ai/Screens/get_started.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -9,16 +10,45 @@ class Login extends StatefulWidget {
   @override
   State<Login> createState() => _LoginState();
 }
-
+                                                                              
 class _LoginState extends State<Login> {
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // Sign-in method using Firebase Authentication
+  Future<void> _signIn() async {
+    try {
+      final UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to HomePage on successful login
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+        (route) => false,
+      );
+    } catch (e) {
+      // Handle any errors during login
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
         backgroundColor: Colors.white,
+        resizeToAvoidBottomInset:
+            true, // This ensures the layout resizes when keyboard appears
+
         body: SafeArea(
           child: LayoutBuilder(builder: (context, constraints) {
             return GestureDetector(
@@ -41,7 +71,8 @@ class _LoginState extends State<Login> {
                             "Let's sign you in",
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: constraints.maxWidth > 400 ? 24.sp : 22.sp,
+                              fontSize:
+                                  constraints.maxWidth > 400 ? 24.sp : 22.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -51,14 +82,17 @@ class _LoginState extends State<Login> {
                             'Welcome back, you have been missed !',
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: constraints.maxWidth > 400 ? 16.sp : 14.sp,
+                              fontSize:
+                                  constraints.maxWidth > 400 ? 16.sp : 14.sp,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: constraints.maxHeight > 800 ? 80.h : 60.h),
+                      SizedBox(
+                          height: constraints.maxHeight > 800 ? 80.h : 60.h),
                       Form(
+                        key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -72,6 +106,7 @@ class _LoginState extends State<Login> {
                             ),
                             SizedBox(height: 10.h),
                             TextFormField(
+                              controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
@@ -190,11 +225,10 @@ class _LoginState extends State<Login> {
                                       end: Alignment.centerRight)),
                               child: MaterialButton(
                                 onPressed: () {
-                                  Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => HomePage()),
-                                      (route) => false);
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    _signIn();
+                                  }
                                 },
                                 minWidth: double.infinity,
                                 height: 45.h,

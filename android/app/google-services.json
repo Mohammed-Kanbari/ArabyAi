@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "489771029802",
+    "project_id": "arabyai-8e708",
+    "storage_bucket": "arabyai-8e708.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489771029802:android:fcf2e9e669611ebe403a53",
+        "android_client_info": {
+          "package_name": "com.example.my_araby_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuN8DWFoXiniFRpqHjAE9j4ZbpGL1ti5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

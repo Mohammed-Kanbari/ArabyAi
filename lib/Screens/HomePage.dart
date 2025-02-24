@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/type_of_contents/Email%20Page/E-mails_page.dart';
 import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/sm_main.dart';
@@ -6,6 +8,8 @@ import 'package:my_araby_ai/Screens//type_of_contents/images_page.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/widgets/type_of_content.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -50,6 +54,48 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _getUsername(); // Fetch username when the widget initializes
+  }
+
+  String username = ""; // Default value
+
+  // This function saves the username in Firestore
+Future<void> _getUsername() async {
+    try {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
+
+    // Fetch the document for the current user using their UID
+    DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
+
+    if (userDoc.exists) {
+      // Get the username from the document
+      setState(() {
+        username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+      });
+    } else {
+      setState(() {
+        username = "User"; // Default username if document doesn't exist
+      });
+    }
+  } catch (e) {
+    print("Error fetching username: $e");
+    setState(() {
+      username = "User"; // Default username if there's an error
+    });
+  }
+}
+
+  // Future<void> _getUsername() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     username = prefs.getString('username') ?? "User"; // Default if no username found
+  //   });
+  // }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -84,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Hello Username,',
+                                    'Hello $username',
                                     style: TextStyle(
                                       fontSize: 16.sp,
                                       fontFamily: 'Poppins',
