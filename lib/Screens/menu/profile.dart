@@ -19,13 +19,14 @@ class _ProfileState extends State<Profile> {
   final List<String> _Numbers = ['UAE +971', 'USA +01', 'UK +671'];
 
   // Variables to hold username and email
+    TextEditingController _emailController = TextEditingController();
+
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _occupationController = TextEditingController();
   TextEditingController _DOBnController = TextEditingController();
 
 
-  String? email = '';
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _ProfileState extends State<Profile> {
       if (userDoc.exists) {
         setState(() {
           _usernameController.text = userDoc['name'];
-          email = userDoc['email'];
+          _emailController.text = userDoc['email'];
           _phoneController.text = userDoc['phone'];
           _occupationController.text = userDoc['occupation'];
           _DOBnController.text = userDoc['dob'];
@@ -238,7 +239,7 @@ class _ProfileState extends State<Profile> {
                       ),
                       kGap10,
                       TextField(
-                        controller: TextEditingController(text: email),
+                        controller: _emailController,
                         enabled: false,
                         textAlignVertical: TextAlignVertical.top,
                         maxLines: null,
