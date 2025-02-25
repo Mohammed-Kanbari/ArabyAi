@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/Screens/araby_splash_screen.dart';
@@ -14,17 +15,22 @@ class AnApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(428, 926), // Ensure correct base size
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: child, // Pass the child
-        );
-      },
-      child: const Araby_SC(), // Wrap your main screen here
+    return DevicePreview(
+      enabled: true,
+      builder: (context) {
+      return ScreenUtilInit(
+        designSize: const Size(428, 926), // Ensure correct base size
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: child, // Pass the child
+          );
+        },
+        child: const Araby_SC(), // Wrap your main screen here
+      );
+      }
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 class Payment extends StatefulWidget {
   const Payment({super.key});
 
@@ -44,7 +43,7 @@ class _PaymentState extends State<Payment> {
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,                  
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       cardHolderName,
@@ -54,7 +53,7 @@ class _PaymentState extends State<Payment> {
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w600),
                     ),
-                  Spacer(),
+                    Spacer(),
                     Text(
                       cardNumber,
                       style: TextStyle(
@@ -62,7 +61,9 @@ class _PaymentState extends State<Payment> {
                           fontSize: 14.sp,
                           fontFamily: 'Poppins'),
                     ),
-                    SizedBox(height: 10.h,),
+                    SizedBox(
+                      height: 10.h,
+                    ),
                     Align(
                       alignment: Alignment(-0.8, 0),
                       child: Image.asset(
@@ -115,7 +116,6 @@ class _PaymentState extends State<Payment> {
           child: Padding(
         padding: EdgeInsets.only(right: 20, left: 20, top: 10, bottom: 3),
         child: Column(
-          
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,82 +141,100 @@ class _PaymentState extends State<Payment> {
             ),
             SizedBox(height: 30.h),
             Expanded(
-              child: ListView(
-                children: [
-                  _buildPaymentCard(
-                    "CARD HOLDER FULL NAME",
-                    "123 ********8790",
-                    "assets/images/visa.png",
-                    const Color(0xFF67A4E6),
-                    isPrimary1,
-                    (value) {
-                      setState(() {
-                        isPrimary1 = value;
-                        isPrimary2 = !value;
-                      });
-                    },
+              child: LayoutBuilder(builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          _buildPaymentCard(
+                            "CARD HOLDER FULL NAME",
+                            "123 ********8790",
+                            "assets/images/visa.png",
+                            const Color(0xFF67A4E6),
+                            isPrimary1,
+                            (value) {
+                              setState(() {
+                                isPrimary1 = value;
+                                isPrimary2 = !value;
+                              });
+                            },
+                          ),
+                          SizedBox(height: 30.h),
+                          _buildPaymentCard(
+                            "CARD HOLDER FULL NAME",
+                            "123 ********8790",
+                            "assets/images/mastercard.png",
+                            const Color(0xFF82dcf2),
+                            isPrimary2,
+                            (value) {
+                              setState(() {
+                                isPrimary2 = value;
+                                isPrimary1 = !value;
+                              });
+                            },
+                          ),
+                          Spacer(),
+                          SizedBox(
+                            height: 35.h,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF3CC8EB),
+                                    Color(0xFF1171D8)
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight),
+                            ),
+                            child: MaterialButton(
+                              onPressed: () {},
+                              minWidth: double.infinity,
+                              height: 45.h,
+                              child: Text(
+                                'Done',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14.sp),
+                              ),
+                            ),
+                          ),
+                          kGap15,
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Have a problem? ",
+                                  style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: const Color(0xFF757575),
+                                      fontFamily: 'Poppins'),
+                                ),
+                                InkWell(
+                                    onTap: () {},
+                                    child: Text(
+                                      ' Contact us',
+                                      style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: const Color(0xFF3CC8EB),
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Poppins'),
+                                    )),
+                              ]),
+                              SizedBox(height: 30.h,)
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 30.h),
-                  _buildPaymentCard(
-                    "CARD HOLDER FULL NAME",
-                    "123 ********8790",
-                    "assets/images/mastercard.png",
-                    const Color(0xFF82dcf2),
-                    isPrimary2,
-                    (value) {
-                      setState(() {
-                        isPrimary2 = value;
-                        isPrimary1 = !value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 35.h,),
-                  Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: LinearGradient(colors: [
-                  Color(0xFF3CC8EB),
-                  Color(0xFF1171D8)
-                ], begin: Alignment.centerLeft, end: Alignment.centerRight),
-              ),
-              child: MaterialButton(
-                onPressed: () {},
-                minWidth: double.infinity,
-                height: 45.h,
-                child: Text(
-                  'Done',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'Poppins',
-                      fontSize: 14.sp),
-                ),
-              ),
+                );
+              }),
             ),
-            kGap15,
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(
-                "Have a problem? ",
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    color: const Color(0xFF757575),
-                    fontFamily: 'Poppins'),
-              ),
-              InkWell(
-                  onTap: () {},
-                  child: Text(
-                    ' Contact us',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                        color: const Color(0xFF3CC8EB),
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins'),
-                  )),
-            ]),
-                ],
-              ),
-            ),
-            
           ],
         ),
       )),

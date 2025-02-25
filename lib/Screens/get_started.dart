@@ -148,10 +148,10 @@ class GetStarted extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () {},
-                        icon: Icon(
-                          Icons.facebook_rounded,
-                          size: 55.sp,
-                          color: const Color.fromARGB(255, 58, 85, 159),
+                        icon: Image.asset(
+                          'assets/images/facebook.png',
+                          width: 50.w,
+                          height: 50.h,
                         ),
                       ),
                       SizedBox(
