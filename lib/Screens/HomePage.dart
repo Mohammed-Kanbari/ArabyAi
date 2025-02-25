@@ -61,39 +61,59 @@ class _HomePageState extends State<HomePage> {
 
   String username = ""; // Default value
 
-  // This function saves the username in Firestore
-Future<void> _getUsername() async {
-    try {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
+//   // This function saves the username in Firestore
+// Future<void> _getUsername() async {
+//     try {
+//     FirebaseFirestore firestore = FirebaseFirestore.instance;
+//     String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
 
-    // Fetch the document for the current user using their UID
-    DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
+//     // Fetch the document for the current user using their UID
+//     DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
 
+//     if (userDoc.exists) {
+//       // Get the username from the document
+//       setState(() {
+//         username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+//       });
+//     } else {
+//       setState(() {
+//         username = "User"; // Default username if document doesn't exist
+//       });
+//     }
+//   } catch (e) {
+//     print("Error fetching username: $e");
+//     setState(() {
+//       username = "User"; // Default username if there's an error
+//     });
+//   }
+// }
+
+
+void _getUsername() {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+
+  firestore.collection('Users').doc(uid).snapshots().listen((userDoc) {
     if (userDoc.exists) {
-      // Get the username from the document
       setState(() {
-        username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+        username = userDoc['name'] ?? "User";
       });
     } else {
       setState(() {
         username = "User"; // Default username if document doesn't exist
       });
     }
-  } catch (e) {
-    print("Error fetching username: $e");
-    setState(() {
-      username = "User"; // Default username if there's an error
-    });
   }
-}
+  );}
 
-  // Future<void> _getUsername() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     username = prefs.getString('username') ?? "User"; // Default if no username found
-  //   });
-  // }
+
+
+
+
+
+
+
+  
 
   @override
   Widget build(BuildContext context) {

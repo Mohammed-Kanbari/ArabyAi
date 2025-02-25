@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
 import 'package:my_araby_ai/Screens/login_page.dart';
 import 'package:my_araby_ai/core/constatns.dart';
@@ -21,40 +22,59 @@ class _MenuState extends State<Menu> {
   @override
   void initState() {
     super.initState();
-    _getUsername(); // Fetch username when the widget initializes
+    _getUsernameAndPhone(); // Fetch username when the widget initializes
   }
 
-String username = ""; // Default value
+  String username = ""; // Default value
+  String phone = "";
 
-  // This function saves the username in Firestore
-Future<void> _getUsername() async {
-    try {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
+  // // This function saves the username in Firestore
+  // Future<void> _getUsername() async {
+  //   try {
+  //     FirebaseFirestore firestore = FirebaseFirestore.instance;
+  //     String uid =
+  //         FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
 
-    // Fetch the document for the current user using their UID
-    DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
+  //     // Fetch the document for the current user using their UID
+  //     DocumentSnapshot userDoc =
+  //         await firestore.collection('Users').doc(uid).get();
 
+  //     if (userDoc.exists) {
+  //       // Get the username from the document
+  //       setState(() {
+  //         username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+  //       });
+  //     } else {
+  //       setState(() {
+  //         username = "User"; // Default username if document doesn't exist
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print("Error fetching username: $e");
+  //     setState(() {
+  //       username = "User"; // Default username if there's an error
+  //     });
+  //   }
+  // }
+
+  void _getUsernameAndPhone() {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String uid = FirebaseAuth.instance.currentUser!.uid;
+
+  firestore.collection('Users').doc(uid).snapshots().listen((userDoc) {
     if (userDoc.exists) {
-      // Get the username from the document
       setState(() {
-        username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
+        username = userDoc['name'] ?? "User";
+        phone = userDoc['phone'] ?? "+971 123456789";
       });
     } else {
       setState(() {
         username = "User"; // Default username if document doesn't exist
+        phone = "+971 123456789";
       });
     }
-  } catch (e) {
-    print("Error fetching username: $e");
-    setState(() {
-      username = "User"; // Default username if there's an error
-    });
   }
-}
-
-
-
+  );}
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +162,7 @@ Future<void> _getUsername() async {
                               ),
                               kGap5,
                               Text(
-                                '+971 123456789',
+                                phone,
                                 style: TextStyle(
                                     fontSize: 16.sp,
                                     fontFamily: 'Poppins',
@@ -232,6 +252,13 @@ Future<void> _getUsername() async {
                                   await SharedPreferences.getInstance();
                               await prefs
                                   .clear(); // This clears all the stored data
+
+                              // Sign out from Firebase Auth
+                              await FirebaseAuth.instance.signOut();
+
+                              // Also sign out from Google (if the user logged in via Google)
+                              GoogleSignIn googleSignIn = GoogleSignIn();
+                              await googleSignIn.signOut();
 
                               // Navigate back to the login screen
                               Navigator.pushAndRemoveUntil(

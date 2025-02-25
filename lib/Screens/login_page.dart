@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/HomePage.dart';
 import 'package:my_araby_ai/Screens/get_started.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -10,7 +12,7 @@ class Login extends StatefulWidget {
   @override
   State<Login> createState() => _LoginState();
 }
-                                                                              
+
 class _LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -37,6 +39,65 @@ class _LoginState extends State<Login> {
       // Handle any errors during login
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login failed: $e')),
+      );
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User canceled the sign-in
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Google sign-in was canceled.')),
+        );
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in with Firebase
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Reference Firestore
+        FirebaseFirestore firestore = FirebaseFirestore.instance;
+        DocumentSnapshot userDoc =
+            await firestore.collection('Users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+          // New user — add to Firestore
+          await firestore.collection('Users').doc(user.uid).set({
+            'email': user.email,
+            'name': null,
+            'password': null,
+            'phone': null,
+            'occupation': null,
+            'dob': null
+          });
+          print("New user added to Firestore");
+        } else {
+          // Existing user — retrieve their details
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+          print("User details: ${userData['email']}, ${userData['name']}, ${userData['phone']}, ${userData['occupation']}, ${userData['dob']}");
+        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In failed: $e')),
       );
     }
   }
@@ -273,7 +334,7 @@ class _LoginState extends State<Login> {
                             width: 22.w,
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: _signInWithGoogle,
                             icon: Image.asset(
                               'assets/images/googleLogo2.png',
                               width: 40.w,
