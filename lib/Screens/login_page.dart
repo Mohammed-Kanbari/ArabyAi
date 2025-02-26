@@ -19,6 +19,8 @@ class _LoginState extends State<Login> {
   bool _obscurePassword = true;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   // Sign-in method using Firebase Authentication
   Future<void> _signIn() async {
@@ -28,6 +30,16 @@ class _LoginState extends State<Login> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .update({
+        'password': _passwordController.text,
+
+      });}
+      
 
       // Navigate to HomePage on successful login
       Navigator.pushAndRemoveUntil(
@@ -102,6 +114,23 @@ class _LoginState extends State<Login> {
       );
     }
   }
+
+Future<void> _resetPassword() async {
+  try {
+    // Send the password reset email
+    await _auth.sendPasswordResetEmail(email: _emailController.text);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Password reset email sent! Check your inbox.')),
+    );
+
+
+   
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.toString()}')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +303,7 @@ class _LoginState extends State<Login> {
                                     height: 10.h,
                                   ),
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: _resetPassword,
                                     child: Text(
                                       'Forget Password ?',
                                       style: TextStyle(

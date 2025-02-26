@@ -10,7 +10,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/widgets/type_of_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -88,32 +87,22 @@ class _HomePageState extends State<HomePage> {
 //   }
 // }
 
+  void _getUsername() {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    String uid = FirebaseAuth.instance.currentUser!.uid;
 
-void _getUsername() {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  String uid = FirebaseAuth.instance.currentUser!.uid;
-
-  firestore.collection('Users').doc(uid).snapshots().listen((userDoc) {
-    if (userDoc.exists) {
-      setState(() {
-        username = userDoc['name'] ?? "User";
-      });
-    } else {
-      setState(() {
-        username = "User"; // Default username if document doesn't exist
-      });
-    }
+    firestore.collection('Users').doc(uid).snapshots().listen((userDoc) {
+      if (userDoc.exists) {
+        setState(() {
+          username = userDoc['name'] ?? "User";
+        });
+      } else {
+        setState(() {
+          username = "User"; // Default username if document doesn't exist
+        });
+      }
+    });
   }
-  );}
-
-
-
-
-
-
-
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +186,8 @@ void _getUsername() {
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 20),
                     child: GridView.builder(
                       itemCount: 9,
                       shrinkWrap: true,
