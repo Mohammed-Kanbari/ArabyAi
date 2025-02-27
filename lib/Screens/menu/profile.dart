@@ -1,11 +1,14 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:my_araby_ai/core/photo_link.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -20,14 +23,14 @@ class _ProfileState extends State<Profile> {
   final List<String> _Numbers = ['UAE +971', 'USA +01', 'UK +671'];
 
   // Variables to hold username and email
-    TextEditingController _emailController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
 
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _occupationController = TextEditingController();
   TextEditingController _DOBnController = TextEditingController();
 
-
+  String? _profileImageUrl;
 
   @override
   void initState() {
@@ -55,10 +58,56 @@ class _ProfileState extends State<Profile> {
           _phoneController.text = userDoc['phone'];
           _occupationController.text = userDoc['occupation'];
           _DOBnController.text = userDoc['dob'];
+          _profileImageUrl = userDoc['profilePic'];
         });
       }
     }
   }
+
+  Future<void> _pickAndSaveImageLocally() async {
+  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  if (pickedFile != null) {
+    File imageFile = File(pickedFile.path);
+
+    try {
+      // Get the app's document directory to save the image locally
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName =
+          '${FirebaseAuth.instance.currentUser!.uid}_profile_pic.jpg';
+      final localPath = '${directory.path}/$fileName';
+
+      // Save the image locally
+      final File savedImage = await imageFile.copy(localPath);
+
+      // Save the local file path to Firestore
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'profilePic': localPath});
+
+      // Fetch updated user data to make sure state reflects Firestore changes
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _profileImageUrl = userDoc['profilePic']; // Use the updated value from Firestore
+        });
+      }
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profile picture updated locally')));
+    } catch (e) {
+      // Handle any errors that occur during the image saving process
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save image locally: $e')));
+    }
+  }
+}
+
 
   Future<void> _saveChanges() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -68,9 +117,10 @@ class _ProfileState extends State<Profile> {
           .doc(user.uid)
           .update({
         'name': _usernameController.text,
-        'phone':_phoneController.text,
-        'occupation':_occupationController.text,
-        'dob': _DOBnController.text
+        'phone': _phoneController.text,
+        'occupation': _occupationController.text,
+        'dob': _DOBnController.text,
+        'profilePic': _profileImageUrl, // Save the profile image path
       });
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Profile updated successfully!')));
@@ -118,16 +168,14 @@ class _ProfileState extends State<Profile> {
 
               // Scrollable content
               Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
+                child: LayoutBuilder(builder: (context, constraints) {
                   return SingleChildScrollView(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20,
                     ),
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight
-                          ),
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
                       child: IntrinsicHeight(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -157,11 +205,17 @@ class _ProfileState extends State<Profile> {
                                         height: 150.0.h,
                                         decoration: BoxDecoration(
                                           color: const Color(0xff7c94b6),
-                                          image: DecorationImage(
-                                            image: AssetImage(
-                                                'assets/images/Rectangle.png'),
-                                            fit: BoxFit.cover,
-                                          ),
+                                          image: _profileImageUrl != null
+                                              ? DecorationImage(
+                                                  image: FileImage(File(
+                                                      _profileImageUrl!)), // Use FileImage to load from local storage
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/images/Rectangle.png'),
+                                                  fit: BoxFit.cover,
+                                                ),
                                           borderRadius: BorderRadius.all(
                                               Radius.elliptical(158, 158)),
                                         ),
@@ -171,30 +225,34 @@ class _ProfileState extends State<Profile> {
                                   Positioned(
                                     right: 5,
                                     bottom: 7,
-                                    child: Stack(children: [
-                                      Container(
-                                        width: 40.w,
-                                        height: 40.h,
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.elliptical(116, 116)),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                  blurRadius: 65, spreadRadius: 0),
-                                            ]),
-                                      ),
-                                      Positioned(
-                                        bottom: 7,
-                                        left: 7,
-                                        child: SvgPicture.asset(
-                                          AppPhoto.pencil,
-                                          width: 24.w,
-                                          height: 24.h,
-                                          fit: BoxFit.contain,
+                                    child: GestureDetector(
+                                      onTap: _pickAndSaveImageLocally,
+                                      child: Stack(children: [
+                                        Container(
+                                          width: 40.w,
+                                          height: 40.h,
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.elliptical(116, 116)),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    blurRadius: 65,
+                                                    spreadRadius: 0),
+                                              ]),
                                         ),
-                                      ),
-                                    ]),
+                                        Positioned(
+                                          bottom: 7,
+                                          left: 7,
+                                          child: SvgPicture.asset(
+                                            AppPhoto.pencil,
+                                            width: 24.w,
+                                            height: 24.h,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ]),
+                                    ),
                                   )
                                 ],
                               ),
@@ -210,8 +268,8 @@ class _ProfileState extends State<Profile> {
                             kGap10,
                             TextField(
                               controller: _usernameController,
-                              style:
-                                  TextStyle(fontFamily: 'Poppins', fontSize: 16.sp),
+                              style: TextStyle(
+                                  fontFamily: 'Poppins', fontSize: 16.sp),
                               textAlignVertical: TextAlignVertical.top,
                               maxLines: null,
                               expands: false,
@@ -219,14 +277,15 @@ class _ProfileState extends State<Profile> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide: BorderSide(
-                                      color: const Color.fromARGB(255, 180, 179, 179),
+                                      color: const Color.fromARGB(
+                                          255, 180, 179, 179),
                                       width: 1.w),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 195, 194, 194)),
+                                      color: const Color.fromARGB(
+                                          255, 195, 194, 194)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -258,12 +317,13 @@ class _ProfileState extends State<Profile> {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                        color: const Color(0xFFC7C7C7), width: 1.w),
+                                        color: const Color(0xFFC7C7C7),
+                                        width: 1.w),
                                   ),
                                   disabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide:
-                                        BorderSide(color: const Color(0xFFC7C7C7)),
+                                    borderSide: BorderSide(
+                                        color: const Color(0xFFC7C7C7)),
                                   ),
                                   contentPadding: EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 12)),
@@ -292,8 +352,8 @@ class _ProfileState extends State<Profile> {
                                           selectedNum = newValue;
                                         });
                                       },
-                                      items:
-                                          _Numbers.map((number) => DropdownMenuItem(
+                                      items: _Numbers.map(
+                                          (number) => DropdownMenuItem(
                                               value: number,
                                               child: FittedBox(
                                                 fit: BoxFit.scaleDown,
@@ -306,7 +366,8 @@ class _ProfileState extends State<Profile> {
                                               ))).toList(),
                                       decoration: InputDecoration(
                                           border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               borderSide: BorderSide(
                                                   color: Color.fromARGB(
                                                       255, 180, 179, 179),
@@ -314,15 +375,15 @@ class _ProfileState extends State<Profile> {
                                           contentPadding: EdgeInsets.symmetric(
                                               horizontal: 8, vertical: 8),
                                           enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               borderSide: BorderSide(
                                                   color: Color.fromARGB(
                                                       255, 195, 194, 194))),
                                           focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                              borderSide: BorderSide(
-                                                  color: Colors.blueAccent,
-                                                  width: 1))),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              borderSide: BorderSide(color: Colors.blueAccent, width: 1))),
                                     ),
                                   ),
                                 ),
@@ -336,8 +397,10 @@ class _ProfileState extends State<Profile> {
                                     child: TextField(
                                       controller: _phoneController,
                                       style: TextStyle(
-                                          fontFamily: 'Poppins', fontSize: 16.sp),
-                                      textAlignVertical: TextAlignVertical.center,
+                                          fontFamily: 'Poppins',
+                                          fontSize: 16.sp),
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
                                       maxLines: 1,
                                       expands: false,
                                       decoration: InputDecoration(
@@ -346,22 +409,26 @@ class _ProfileState extends State<Profile> {
                                               color: const Color(0xFFC7C7C7),
                                               fontSize: 14.sp),
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             borderSide: BorderSide(
                                                 color: const Color.fromARGB(
                                                     255, 180, 179, 179),
                                                 width: 1),
                                           ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             borderSide: BorderSide(
                                                 color: const Color.fromARGB(
                                                     255, 195, 194, 194)),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             borderSide: BorderSide(
-                                                color: Colors.blueAccent, width: 1),
+                                                color: Colors.blueAccent,
+                                                width: 1),
                                           ),
                                           contentPadding: EdgeInsets.symmetric(
                                               horizontal: 16, vertical: 12)),
@@ -381,8 +448,8 @@ class _ProfileState extends State<Profile> {
                             kGap10,
                             TextField(
                               controller: _occupationController,
-                              style:
-                                  TextStyle(fontSize: 16.sp, fontFamily: 'Poppins'),
+                              style: TextStyle(
+                                  fontSize: 16.sp, fontFamily: 'Poppins'),
                               textAlignVertical: TextAlignVertical.top,
                               maxLines: null,
                               expands: false,
@@ -394,15 +461,15 @@ class _ProfileState extends State<Profile> {
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                        color:
-                                            const Color.fromARGB(255, 180, 179, 179),
+                                        color: const Color.fromARGB(
+                                            255, 180, 179, 179),
                                         width: 1),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                        color:
-                                            const Color.fromARGB(255, 195, 194, 194)),
+                                        color: const Color.fromARGB(
+                                            255, 195, 194, 194)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -423,8 +490,8 @@ class _ProfileState extends State<Profile> {
                             kGap10,
                             TextField(
                               controller: _DOBnController,
-                              style:
-                                  TextStyle(fontSize: 16.sp, fontFamily: 'Poppins'),
+                              style: TextStyle(
+                                  fontSize: 16.sp, fontFamily: 'Poppins'),
                               textAlignVertical: TextAlignVertical.top,
                               maxLines: null,
                               expands: false,
@@ -432,24 +499,26 @@ class _ProfileState extends State<Profile> {
                                   suffixIcon: Icon(
                                     size: 24.sp,
                                     Icons.calendar_today_outlined,
-                                    color: const Color.fromARGB(255, 183, 182, 182),
+                                    color: const Color.fromARGB(
+                                        255, 183, 182, 182),
                                   ),
                                   hintText: 'DD/MM/YYYY',
                                   hintStyle: TextStyle(
-                                      color: const Color.fromARGB(255, 183, 182, 182),
+                                      color: const Color.fromARGB(
+                                          255, 183, 182, 182),
                                       fontSize: 14.sp),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                        color:
-                                            const Color.fromARGB(255, 180, 179, 179),
+                                        color: const Color.fromARGB(
+                                            255, 180, 179, 179),
                                         width: 1),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                        color:
-                                            const Color.fromARGB(255, 195, 194, 194)),
+                                        color: const Color.fromARGB(
+                                            255, 195, 194, 194)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -465,18 +534,22 @@ class _ProfileState extends State<Profile> {
                               width: double.infinity,
                               decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                      colors: [Color(0xFF3CC8EB), Color(0xFF1171D8)],
+                                      colors: [
+                                        Color(0xFF3CC8EB),
+                                        Color(0xFF1171D8)
+                                      ],
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight),
                                   borderRadius: BorderRadius.circular(10)),
                               child: ElevatedButton(
                                   onPressed: _saveChanges,
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          const Color.fromARGB(0, 255, 255, 255),
+                                      backgroundColor: const Color.fromARGB(
+                                          0, 255, 255, 255),
                                       shadowColor: Colors.transparent,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10))),
+                                          borderRadius:
+                                              BorderRadius.circular(10))),
                                   child: Text(
                                     'Save Changes',
                                     style: TextStyle(
@@ -494,7 +567,7 @@ class _ProfileState extends State<Profile> {
                       ),
                     ),
                   );
-  }),
+                }),
               ),
             ],
           ),

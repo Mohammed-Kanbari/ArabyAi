@@ -23,39 +23,13 @@ class _MenuState extends State<Menu> {
   void initState() {
     super.initState();
     _getUsernameAndPhone(); // Fetch username when the widget initializes
+    
   }
 
   String username = ""; // Default value
   String phone = "";
+  
 
-  // // This function saves the username in Firestore
-  // Future<void> _getUsername() async {
-  //   try {
-  //     FirebaseFirestore firestore = FirebaseFirestore.instance;
-  //     String uid =
-  //         FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
-
-  //     // Fetch the document for the current user using their UID
-  //     DocumentSnapshot userDoc =
-  //         await firestore.collection('Users').doc(uid).get();
-
-  //     if (userDoc.exists) {
-  //       // Get the username from the document
-  //       setState(() {
-  //         username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
-  //       });
-  //     } else {
-  //       setState(() {
-  //         username = "User"; // Default username if document doesn't exist
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("Error fetching username: $e");
-  //     setState(() {
-  //       username = "User"; // Default username if there's an error
-  //     });
-  //   }
-  // }
 
   void _getUsernameAndPhone() {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
