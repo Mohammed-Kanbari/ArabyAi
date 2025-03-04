@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -47,6 +48,17 @@ class _Image_PageState extends State<Image_Page> {
     "Asethetic",
   ];
 
+  final List<String> randomPrompts = [
+    "A glowing forest at night",
+    "A robot dancing in a disco",
+    "A floating castle in the sky",
+    "A colorful underwater city",
+    "A dragon flying over mountains",
+    "A futuristic car in space",
+    "A cat wearing a crown",
+    "A magical library with flying books",
+  ];
+
   // Map to track selected state of each tag
   final Map<String, bool> selectedTags = {};
 
@@ -84,8 +96,8 @@ class _Image_PageState extends State<Image_Page> {
   }
 
   //API call to generate image
-  Future<void> generateImage() async {
-    if (!isButtononEnabled || isLoading) return;
+  Future<void> generateImage({String? customPrompt, List<String>? customTags}) async {
+    if (isLoading) return;
 
     setState(() {
       isLoading = true;
@@ -94,47 +106,36 @@ class _Image_PageState extends State<Image_Page> {
     });
 
     try {
-      const String apiToken = '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';
-      final String fullPrompt = _promptController.text +
-          (selectedTags.values.contains(true)
-              ? ', ' +
-                  selectedTags.entries
-                      .where((e) => e.value)
-                      .map((e) => e.key)
-                      .join(', ')
-              : '');
+      const String apiToken = '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'; // Your token
+      final String prompt = customPrompt ?? _promptController.text;
+      final List<String> activeTags = customTags ?? 
+          selectedTags.entries.where((e) => e.value).map((e) => e.key).toList();
+      final String fullPrompt = prompt + (activeTags.isNotEmpty ? ', ' + activeTags.join(', ') : '');
 
       final response = await http.post(
-        Uri.parse(
-            'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0'),
+        Uri.parse('https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0'),
         headers: {
           'Authorization': 'Bearer $apiToken',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'inputs': fullPrompt,
-          // Optional parameters (adjust as needed)
-          'parameters': {
-            'num_inference_steps': 50,
-            'guidance_scale': 7.5,
-          },
+          'parameters': {'num_inference_steps': 50, 'guidance_scale': 7.5},
         }),
       );
-      print('Status ${response.statusCode}');
-      print(
-          'Body length: ${response.bodyBytes.length} bytes'); // Log size for debugging
+
+      print('Status: ${response.statusCode}');
+      print('Body length: ${response.bodyBytes.length} bytes');
 
       if (response.statusCode == 200) {
         setState(() {
-          imageBytes = response.bodyBytes; // Store raw bytes
+          imageBytes = response.bodyBytes;
           isLoading = false;
         });
       } else {
-        final errorBody =
-            response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        final errorBody = response.body.isNotEmpty ? jsonDecode(response.body) : {};
         setState(() {
-          errorMessage =
-              'Failed to generate image: ${response.statusCode} - ${errorBody['error'] ?? 'Unknown error'}';
+          errorMessage = 'Failed: ${response.statusCode} - ${errorBody['error'] ?? 'Unknown error'}';
           isLoading = false;
         });
       }
@@ -144,6 +145,28 @@ class _Image_PageState extends State<Image_Page> {
         isLoading = false;
       });
     }
+  }
+
+  void autoGenerate() {
+    setState(() {
+      _promptController.clear();
+      selectedTags.updateAll((key, value) => false);
+    });
+
+    final random = Random();
+    final randomPrompt = randomPrompts[random.nextInt(randomPrompts.length)];
+    final shuffledTags = (tags.toList()..shuffle(random));
+    final autoTags = shuffledTags.take(random.nextInt(4)).toList();
+
+    setState(() {
+      _promptController.text = randomPrompt;
+      for (var tag in autoTags) {
+        selectedTags[tag] = true;
+      }
+      isButtononEnabled = true;
+    });
+
+    generateImage(customPrompt: randomPrompt, customTags: autoTags);
   }
 
   @override
@@ -251,7 +274,7 @@ class _Image_PageState extends State<Image_Page> {
                                     color: Color.fromARGB(255, 121, 121, 121)),
                               ),
                               OutlinedButton(
-                                  onPressed: () {},
+                                  onPressed: autoGenerate,
                                   style: OutlinedButton.styleFrom(
                                       padding:
                                           EdgeInsets.symmetric(horizontal: 16),
