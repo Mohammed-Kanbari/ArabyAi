@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
+import 'package:http/http.dart' as http;
 
 class Image_Page extends StatefulWidget {
   const Image_Page({super.key});
@@ -52,6 +56,10 @@ class _Image_PageState extends State<Image_Page> {
   //Variable to track the button's enabled/disabled state
   bool isButtononEnabled = false;
 
+  bool isLoading = false;
+  Uint8List? imageBytes;
+  String errorMessage = '';
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +81,69 @@ class _Image_PageState extends State<Image_Page> {
     super.dispose();
 
     _promptController.dispose();
+  }
+
+  //API call to generate image
+  Future<void> generateImage() async {
+    if (!isButtononEnabled || isLoading) return;
+
+    setState(() {
+      isLoading = true;
+      imageBytes = null;
+      errorMessage = '';
+    });
+
+    try {
+      const String apiToken = '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';
+      final String fullPrompt = _promptController.text +
+          (selectedTags.values.contains(true)
+              ? ', ' +
+                  selectedTags.entries
+                      .where((e) => e.value)
+                      .map((e) => e.key)
+                      .join(', ')
+              : '');
+
+      final response = await http.post(
+        Uri.parse(
+            'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0'),
+        headers: {
+          'Authorization': 'Bearer $apiToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'inputs': fullPrompt,
+          // Optional parameters (adjust as needed)
+          'parameters': {
+            'num_inference_steps': 50,
+            'guidance_scale': 7.5,
+          },
+        }),
+      );
+      print('Status ${response.statusCode}');
+      print(
+          'Body length: ${response.bodyBytes.length} bytes'); // Log size for debugging
+
+      if (response.statusCode == 200) {
+        setState(() {
+          imageBytes = response.bodyBytes; // Store raw bytes
+          isLoading = false;
+        });
+      } else {
+        final errorBody =
+            response.body.isNotEmpty ? jsonDecode(response.body) : {};
+        setState(() {
+          errorMessage =
+              'Failed to generate image: ${response.statusCode} - ${errorBody['error'] ?? 'Unknown error'}';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -139,9 +210,7 @@ class _Image_PageState extends State<Image_Page> {
                               textAlignVertical: TextAlignVertical.top,
                               maxLines: null,
                               expands: true,
-                              style: TextStyle(
-                                fontSize: 16.sp
-                              ),
+                              style: TextStyle(fontSize: 16.sp),
                               decoration: InputDecoration(
                                   hintText:
                                       'Example: A car flying in the space',
@@ -231,11 +300,10 @@ class _Image_PageState extends State<Image_Page> {
                           label: Text(
                             tag,
                             style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400
-                            ),
-                            ),
+                                fontFamily: 'Poppins',
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400),
+                          ),
                           selected: selectedTags[tag] ?? false,
                           onSelected: (isSelected) {
                             setState(() {
@@ -278,16 +346,13 @@ class _Image_PageState extends State<Image_Page> {
             ],
           ),
           child: Center(
-              child: Container(
+            child: Container(
                 width: double.infinity,
                 margin: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                 decoration: isButtononEnabled
                     ? BoxDecoration(
                         gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF3CC8EB),
-                              Color(0xFF1171D8)
-                            ],
+                            colors: [Color(0xFF3CC8EB), Color(0xFF1171D8)],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight),
                         borderRadius: BorderRadius.circular(10))
@@ -295,27 +360,70 @@ class _Image_PageState extends State<Image_Page> {
                         color: const Color.fromARGB(0, 238, 238, 238),
                         borderRadius: BorderRadius.circular(10)),
                 child: ElevatedButton(
-                    onPressed: isButtononEnabled ? () {} : null,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(0, 255, 255, 255),
-                        shadowColor: Colors.transparent,
-                      
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                    child: Text(
-                      'Generate Image',
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: isButtononEnabled
-                              ? Colors.white
-                              : const Color.fromARGB(178, 206, 195, 195)),
-                    )),
-              )),
+                  onPressed: isButtononEnabled ? generateImage : null,
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : Text(
+                          'Generate Image',
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              color: isButtononEnabled
+                                  ? Colors.white
+                                  : const Color.fromARGB(178, 206, 195, 195)),
+                        ),
+                )),
+          ),
         ),
+        floatingActionButton: imageBytes != null || errorMessage.isNotEmpty
+            ? FloatingActionButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (imageBytes != null)
+                              SizedBox(
+                                width: 300.w, // Adjust width
+                                height: 300.h, // Adjust height
+                                child: Image.memory(imageBytes!),
+                              ),
+                            if (errorMessage.isNotEmpty)
+                              Text(errorMessage),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            setState(() {
+                              imageBytes = null;
+                              errorMessage = '';
+                            });
+                          },
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Icon(Icons.image),
+              )
+            : null,
       ),
     );
   }
