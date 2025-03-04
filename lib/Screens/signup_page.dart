@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/widgets/signin/signin_w2.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Singup extends StatefulWidget {
   const Singup({super.key});

@@ -8,7 +8,6 @@ import 'package:my_araby_ai/Screens//type_of_contents/images_page.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/widgets/type_of_content.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+// Import SharedPreferences
 import 'package:my_araby_ai/widgets/signin/check_email.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
