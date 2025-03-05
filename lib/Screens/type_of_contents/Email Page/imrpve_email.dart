@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ImrpveEmail extends StatefulWidget {
   const ImrpveEmail({super.key});
@@ -18,6 +20,11 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
   final TextEditingController recipient_Controller = TextEditingController();
 
   bool isButtononEnabled = false;
+
+  bool isLoading = false;
+  String improvedEmail = '';
+  String errorMessage = '';
+
 
   String? _selectedLanguage = 'English';
   String? _selectedTone;
@@ -49,6 +56,71 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
     setState(() {
       isButtononEnabled = isFormValid;
     });
+  }
+
+  Future<void> improveEmail() async {
+    if (!isButtononEnabled || isLoading) return;
+
+    setState(() {
+      isLoading = true;
+      improvedEmail = '';
+      errorMessage = '';
+    });
+
+    try {
+      const String apiToken = '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'; // Your token
+      final String fullPrompt = "Paraphrase this text into a $_selectedTone tone: '${email_Controller.text}'";
+
+      final response = await http.post(
+        Uri.parse('https://api-inference.huggingface.co/models/prithivida/parrot_paraphraser_on_T5'),
+        headers: {
+          'Authorization': 'Bearer $apiToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'inputs': fullPrompt}),
+      );
+
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String rawText = data[0]['generated_text'] ?? 'No improvement generated';
+        final promptPrefix = "Paraphrase this text into a $_selectedTone tone: '";
+        final improvedText = rawText.startsWith(promptPrefix)
+            ? rawText.substring(promptPrefix.length).trim().replaceAll("'", "")
+            : rawText;
+        setState(() {
+          improvedEmail = "Subject: Improved Email\nFrom: ${sender_Controller.text}\nTo: ${recipient_Controller.text}\n\n$improvedText";
+          isLoading = false;
+        });
+      } else {
+        String errorDetail = 'Unknown error';
+        if (response.body.contains('<!doctype html>')) {
+          errorDetail = response.statusCode == 429
+              ? 'Rate limit exceeded - try again later'
+              : response.statusCode == 503
+                  ? 'Model is loading - retry in a moment'
+                  : 'Unexpected server response';
+        } else {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorDetail = errorBody['error'] ?? 'Unknown error';
+          } catch (_) {
+            errorDetail = 'Server returned invalid data';
+          }
+        }
+        setState(() {
+          errorMessage = 'Failed: ${response.statusCode} - $errorDetail';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -352,7 +424,7 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
                                         borderRadius:
                                             BorderRadius.circular(10)),
                                 child: ElevatedButton(
-                                    onPressed: isButtononEnabled ? () {} : null,
+                                    onPressed: isButtononEnabled ? improveEmail : null,
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color.fromARGB(
                                             0, 255, 255, 255),
@@ -360,18 +432,20 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(10))),
-                                    child: Text(
-                                      'Generate',
-                                      style: TextStyle(
-                                          fontSize: 14.sp,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                          color: isButtononEnabled
-                                              ? Colors.white
-                                              : const Color.fromARGB(
-                                                  121, 182, 174, 174)),
+                                    child: isLoading ? const CircularProgressIndicator(color: Colors.white,)
+                                      : Text(
+                                        'Generate',
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
+                                            color: isButtononEnabled
+                                                ? Colors.white
+                                                : const Color.fromARGB(
+                                                    121, 182, 174, 174)),
+                                      ),
                                     )),
-                              ),
+                              
                               SizedBox(
                                 height: 30.h,
                               )
@@ -387,6 +461,56 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
           ),
         ),
       ),
+      floatingActionButton: improvedEmail.isNotEmpty || errorMessage.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (improvedEmail.isNotEmpty)
+                            Text(
+                              improvedEmail,
+                              style: TextStyle(fontSize: 16.sp, fontFamily: 'Poppins'),
+                            ),
+                          if (errorMessage.isNotEmpty)
+                            Text(
+                              errorMessage,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      if (errorMessage.contains('503'))
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            improveEmail();
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            improvedEmail = '';
+                            errorMessage = '';
+                          });
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Icon(Icons.email),
+            )
+          : null,
     );
+    
   }
 }
