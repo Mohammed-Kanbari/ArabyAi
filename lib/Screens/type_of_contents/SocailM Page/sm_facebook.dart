@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/theStatus.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SmFacebook extends StatefulWidget {
   const SmFacebook({super.key});
@@ -14,9 +17,11 @@ class _SmFacebookState extends State<SmFacebook> {
   final List<String> _tone = ['Professional', 'Casual', 'Friendly', 'Formal'];
 
   final TextEditingController postAbout_Controller = TextEditingController();
-  final TextEditingController recipient_Controller = TextEditingController();
 
   bool isButtononEnabled = false;
+  bool isLoading = false;
+  String generatedStatus = '';
+  String errorMessage = '';
 
   String? _selectedLanguage = 'English';
   String? _selectedTone;
@@ -41,6 +46,93 @@ class _SmFacebookState extends State<SmFacebook> {
       isButtononEnabled = isFormValid;
     });
   }
+
+  Future<void> generatedFBStatus() async {
+    if (!isButtononEnabled || isLoading) return;
+
+    setState(() {
+      isLoading = true;
+      generatedStatus = '';
+      errorMessage = '';
+    });
+
+    try {
+      const String apiToken = 'KBXuciWibf7lXWdriz5dcFo3ISego3Y3r4nymmL8'; // Replace with your Cohere key
+      final String fullPrompt = "Generate a short Facebook status in $_selectedLanguage about '${postAbout_Controller.text}' in a $_selectedTone tone.";
+
+      final response = await http.post(
+        Uri.parse('https://api.cohere.ai/v1/generate'),
+        headers: {
+          'Authorization': 'Bearer $apiToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'prompt': fullPrompt,
+          'max_tokens': 50,
+          'temperature': 0.7,
+          'num_generations': 3,
+        }),
+      );
+
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<String> statuses = (data['generations'] as List)
+            .map((gen) {
+              String rawText = gen['text'] ?? 'No status generated';
+              return rawText.startsWith(fullPrompt)
+                  ? rawText.substring(fullPrompt.length).trim()
+                  : rawText;
+            })
+            .toList();
+        setState(() {
+          isLoading = false;
+        });
+        // Navigate to the result page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FB_Status(generatedStatuses: statuses),
+          ),
+        );
+      } else {
+        String errorDetail = 'Unknown error';
+        if (response.body.isNotEmpty) {
+          try {
+            final errorBody = jsonDecode(response.body);
+            errorDetail = errorBody['message'] ?? 'Unknown error';
+          } catch (_) {
+            errorDetail = 'Failed to parse error response';
+          }
+        }
+        setState(() {
+          errorMessage = 'Failed ${response.statusCode}: $errorDetail';
+          isLoading = false;
+        });
+        // Navigate to show error
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FB_Status(generatedStatuses: [errorMessage], isError: true),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FB_Status(generatedStatuses: [errorMessage], isError: true),
+        ),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -231,24 +323,26 @@ class _SmFacebookState extends State<SmFacebook> {
                           color: const Color.fromARGB(0, 238, 238, 238),
                           borderRadius: BorderRadius.circular(10)),
                   child: ElevatedButton(
-                      onPressed: isButtononEnabled ? () {} : null,
+                      onPressed: isButtononEnabled ? generatedFBStatus : null,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(0, 255, 255, 255),
                           shadowColor: Colors.transparent,
                           padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10))),
-                      child: Text(
-                        'Generate',
-                        style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                            color: isButtononEnabled
-                                ? Colors.white
-                                : const Color.fromARGB(121, 182, 174, 174)),
+                      child: isLoading ? const CircularProgressIndicator(color: Colors.white,) : 
+                          Text(
+                          'Generate',
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              color: isButtononEnabled
+                                  ? Colors.white
+                                  : const Color.fromARGB(121, 182, 174, 174)),
+                        ),
                       )),
-                ),
+                
                 SizedBox(height: 30.h,)
               ],
             ),

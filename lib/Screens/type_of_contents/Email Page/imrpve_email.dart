@@ -68,16 +68,20 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
     });
 
     try {
-      const String apiToken = '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'; // Your token
+      const String apiToken = 'KBXuciWibf7lXWdriz5dcFo3ISego3Y3r4nymmL8'; // Replace with your Cohere key
       final String fullPrompt = "Paraphrase this text into a $_selectedTone tone: '${email_Controller.text}'";
 
       final response = await http.post(
-        Uri.parse('https://api-inference.huggingface.co/models/prithivida/parrot_paraphraser_on_T5'),
+        Uri.parse('https://api.cohere.ai/v1/generate'),
         headers: {
           'Authorization': 'Bearer $apiToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'inputs': fullPrompt}),
+        body: jsonEncode({
+          'prompt': fullPrompt,
+          'max_tokens': 150, // Allow enough for email body
+          'temperature': 0.7,
+        }),
       );
 
       print('Status: ${response.statusCode}');
@@ -85,7 +89,7 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        String rawText = data[0]['generated_text'] ?? 'No improvement generated';
+        String rawText = data['generations'][0]['text'] ?? 'No improvement generated';
         final promptPrefix = "Paraphrase this text into a $_selectedTone tone: '";
         final improvedText = rawText.startsWith(promptPrefix)
             ? rawText.substring(promptPrefix.length).trim().replaceAll("'", "")
@@ -96,22 +100,16 @@ class _ImrpveEmailState extends State<ImrpveEmail> {
         });
       } else {
         String errorDetail = 'Unknown error';
-        if (response.body.contains('<!doctype html>')) {
-          errorDetail = response.statusCode == 429
-              ? 'Rate limit exceeded - try again later'
-              : response.statusCode == 503
-                  ? 'Model is loading - retry in a moment'
-                  : 'Unexpected server response';
-        } else {
+        if (response.body.isNotEmpty) {
           try {
             final errorBody = jsonDecode(response.body);
-            errorDetail = errorBody['error'] ?? 'Unknown error';
+            errorDetail = errorBody['message'] ?? 'Unknown error';
           } catch (_) {
-            errorDetail = 'Server returned invalid data';
+            errorDetail = 'Failed to parse error response';
           }
         }
         setState(() {
-          errorMessage = 'Failed: ${response.statusCode} - $errorDetail';
+          errorMessage = 'Failed ${response.statusCode}: $errorDetail';
           isLoading = false;
         });
       }
