@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/theStatus.dart';
+import 'package:my_araby_ai/Screens/side_screens/theStatus.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';

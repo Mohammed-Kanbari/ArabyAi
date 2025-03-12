@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:my_araby_ai/Screens/HomePage.dart';
-import 'package:my_araby_ai/Screens/Login_page.dart';
-import 'package:my_araby_ai/Screens/signup_page.dart';
+import 'package:my_araby_ai/Screens/main_screens/HomePage.dart';
+import 'package:my_araby_ai/Screens/starting_screens/Login_page.dart';
+import 'package:my_araby_ai/Screens/starting_screens/signin/signup_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GetStarted extends StatefulWidget {

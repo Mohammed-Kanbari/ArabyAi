@@ -1,12 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/widgets/signin/signin_w3.dart';
+import 'package:my_araby_ai/Screens/starting_screens/signin/signin_w3.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
+import 'package:provider/provider.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
 
 class SingupW2 extends StatefulWidget {
-  final String email; // Pass the email from the first page
-  const SingupW2({super.key, required this.email});
+  const SingupW2({super.key});
 
   @override
   State<SingupW2> createState() => _SingupW2State();
@@ -43,38 +44,45 @@ class _SingupW2State extends State<SingupW2> {
 
   // Firebase signup method
   Future<void> _signUp() async {
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: widget.email, // Get the email from the first page
-        password: _passwordController.text.trim(),
-      );
+    if (_formKey.currentState?.validate() ?? false) {
+      String password = _passwordController.text.trim();
+      String email = context.read<UserProvider>().email ?? '';
 
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userCredential.user?.uid)
-          .set({
-        'email': widget.email,
-        'password': _passwordController.text.trim(),
-        'phone': null,
-        'occupation': null,
-        'dob': null
-      }).timeout(Duration(seconds: 5), onTimeout: () {
-        throw FirebaseException(
-            message: "Firestore operation timed out.", plugin: '');
-      });
+      try {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email, // Get the email from the provider
+          password: password,
+        );
 
-      // After successful signup, navigate to the next page (username)
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SingupW3(), // Third page for the username
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = e.message ?? 'An error occurred';
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorMessage)));
+        String uid = userCredential.user!.uid;
+        context.read<UserProvider>().setPassword(password, firebaseUid: uid);
+
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userCredential.user?.uid)
+            .set({
+          'email': email,
+          'phone': null,
+          'occupation': null,
+          'dob': null
+        }).timeout(Duration(seconds: 5), onTimeout: () {
+          throw FirebaseException(
+              message: "Firestore operation timed out.", plugin: '');
+        });
+
+        // After successful signup, navigate to the next page (username)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SingupW3(), // Third page for the username
+          ),
+        );
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = e.message ?? 'An error occurred';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
     }
   }
 

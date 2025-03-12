@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/widgets/signin/last.dart';
+import 'package:my_araby_ai/Screens/starting_screens/signin/last.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

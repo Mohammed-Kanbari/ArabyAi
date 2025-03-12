@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/core/constatns.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/sm_facebook.dart';
+import 'package:my_araby_ai/Screens/side_screens/sm_facebook.dart';
 
 import 'package:my_araby_ai/widgets/social_type.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:my_araby_ai/Screens/welcome.dart';
+import 'package:my_araby_ai/Screens/starting_screens/welcome.dart';
 
 class Araby_SC extends StatefulWidget {
   const Araby_SC({super.key});

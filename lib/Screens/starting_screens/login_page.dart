@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/Screens/HomePage.dart';
-import 'package:my_araby_ai/Screens/get_started.dart';
+import 'package:my_araby_ai/Screens/main_screens/HomePage.dart';
+import 'package:my_araby_ai/Screens/starting_screens/get_started.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -19,118 +21,113 @@ class _LoginState extends State<Login> {
   bool _obscurePassword = true;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-
-  // Sign-in method using Firebase Authentication
+  // Sign-in method using Firebase Authentication (Email/Password)
   Future<void> _signIn() async {
-    try {
-      final UserCredential userCredential =
-          await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-      User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .update({
-        'password': _passwordController.text,
-
-      });}
-      
-
-      // Navigate to HomePage on successful login
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-        (route) => false,
-      );
-    } catch (e) {
-      // Handle any errors during login
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final UserCredential userCredential =
+            await _auth.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        User? user = userCredential.user;
+        if (user != null) {
+          UserProvider provider = context.read<UserProvider>();
+          if (provider.username == null || provider.firebaseUid != user.uid) {
+            DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+            provider.setEmail(user.email ?? '');
+            provider.setPassword(_passwordController.text.trim(), firebaseUid: user.uid);
+            provider.setUsername(userDoc.exists ? userDoc['name'] ?? 'User' : 'User');
+            provider.setPhone(userDoc.exists ? userDoc['phone'] ?? '+971 123456789' : '+971 123456789');
+            provider.setProfilePictureUrl(userDoc.exists ? userDoc['profilePictureUrl'] : null);
+          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: $e')),
+        );
+      }
     }
   }
 
+  // Sign-in method using Google
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
-        // User canceled the sign-in
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-in was canceled.')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Google sign-in was canceled.')));
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Sign in with Firebase
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
       User? user = userCredential.user;
 
       if (user != null) {
-        // Reference Firestore
-        FirebaseFirestore firestore = FirebaseFirestore.instance;
-        DocumentSnapshot userDoc =
-            await firestore.collection('Users').doc(user.uid).get();
-
-        if (!userDoc.exists) {
-          // New user — add to Firestore
-          await firestore.collection('Users').doc(user.uid).set({
-            'email': user.email,
-            'name': null,
-            'password': null,
-            'phone': null,
-            'occupation': null,
-            'dob': null
-          });
-          print("New user added to Firestore");
-        } else {
-          // Existing user — retrieve their details
-          Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
-          print(
-              "User details: ${userData['email']}, ${userData['name']}, ${userData['phone']}, ${userData['occupation']}, ${userData['dob']}");
+        UserProvider provider = context.read<UserProvider>();
+        if (provider.username == null || provider.firebaseUid != user.uid) {
+          DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+          if (!userDoc.exists) {
+            await _firestore.collection('Users').doc(user.uid).set({
+              'email': user.email,
+              'name': googleUser.displayName ?? 'User',
+              'phone': '+971 123456789',
+              'occupation': null,
+              'dob': null,
+              'created_at': FieldValue.serverTimestamp(),
+            });
+            provider.setEmail(user.email ?? '');
+            provider.setPassword('', firebaseUid: user.uid);
+            provider.setUsername(googleUser.displayName ?? 'User');
+            provider.setPhone('+971 123456789');
+            provider.setProfilePictureUrl(null);
+          } else {
+            provider.setEmail(user.email ?? '');
+            provider.setPassword('', firebaseUid: user.uid);
+            provider.setUsername(userDoc['name'] ?? 'User');
+            provider.setPhone(userDoc['phone'] ?? '+971 123456789');
+            provider.setProfilePictureUrl(userDoc['profilePictureUrl']);
+          }
         }
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign-In failed: $e')));
     }
   }
 
-Future<void> _resetPassword() async {
-  try {
-    // Send the password reset email
-    await _auth.sendPasswordResetEmail(email: _emailController.text);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password reset email sent! Check your inbox.')),
-    );
-
-
-   
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: ${e.toString()}')),
-    );
+  Future<void> _resetPassword() async {
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email to reset password.')),
+      );
+      return;
+    }
+    try {
+      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent! Check your inbox.')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

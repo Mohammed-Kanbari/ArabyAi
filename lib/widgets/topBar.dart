@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/Email%20Page/E-mails_page.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/Email%20Page/imrpve_email.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/sm_facebook.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/sm_main.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/images_page.dart';
+import 'package:my_araby_ai/Screens/main_screens/E-mails_page.dart';
+import 'package:my_araby_ai/Screens/side_screens/imrpve_email.dart';
+import 'package:my_araby_ai/Screens/side_screens/sm_facebook.dart';
+import 'package:my_araby_ai/Screens/main_screens/sm_main.dart';
+import 'package:my_araby_ai/Screens/main_screens/images_page.dart';
 import 'package:my_araby_ai/core/app_colors.dart';
 import 'package:my_araby_ai/core/photo_link.dart';
-import 'package:my_araby_ai/Screens/menu/menu.dart';
+import 'package:my_araby_ai/Screens/main_screens/menu/menu.dart';
 
 class Topbar extends StatefulWidget {
   const Topbar({super.key});

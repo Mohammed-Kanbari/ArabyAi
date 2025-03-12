@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/Screens/get_started.dart';
+import 'package:my_araby_ai/Screens/starting_screens/get_started.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 

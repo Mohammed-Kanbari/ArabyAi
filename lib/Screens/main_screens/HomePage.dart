@@ -1,24 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/Email%20Page/E-mails_page.dart';
-import 'package:my_araby_ai/Screens/type_of_contents/SocailM%20Page/sm_main.dart';
+import 'package:my_araby_ai/Screens/main_screens/E-mails_page.dart';
+import 'package:my_araby_ai/Screens/main_screens/sm_main.dart';
 import 'package:my_araby_ai/core/constatns.dart';
-import 'package:my_araby_ai/Screens//type_of_contents/images_page.dart';
+import 'package:my_araby_ai/Screens/main_screens/images_page.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
 import 'package:my_araby_ai/widgets/topBar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/widgets/type_of_content.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
   // List of image paths
-  List<String> imagePaths = [
+  static const List<String> imagePaths = [
     'assets/home_imgs/1.png',
     'assets/home_imgs/2.png',
     'assets/home_imgs/3.png',
@@ -31,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   ];
 
   // List of texts
-  List<String> texts = [
+  static const List<String> texts = [
     'Image',
     'Social Media',
     'E-mails',
@@ -44,64 +40,12 @@ class _HomePageState extends State<HomePage> {
   ];
 
   // List of pages you want to navigate to
-  List<Widget> pages = [
+  static const List<Widget> pages = [
     Image_Page(), // for index 0
     SmMain(), // for index 1
     Email_Page()
     // Add more pages here
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _getUsername(); // Fetch username when the widget initializes
-  }
-
-  String username = ""; // Default value
-
-//   // This function saves the username in Firestore
-// Future<void> _getUsername() async {
-//     try {
-//     FirebaseFirestore firestore = FirebaseFirestore.instance;
-//     String uid = FirebaseAuth.instance.currentUser!.uid; // Get the current user's UID
-
-//     // Fetch the document for the current user using their UID
-//     DocumentSnapshot userDoc = await firestore.collection('Users').doc(uid).get();
-
-//     if (userDoc.exists) {
-//       // Get the username from the document
-//       setState(() {
-//         username = userDoc['name'] ?? "User"; // Assuming the field is 'name'
-//       });
-//     } else {
-//       setState(() {
-//         username = "User"; // Default username if document doesn't exist
-//       });
-//     }
-//   } catch (e) {
-//     print("Error fetching username: $e");
-//     setState(() {
-//       username = "User"; // Default username if there's an error
-//     });
-//   }
-// }
-
-  void _getUsername() {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    String uid = FirebaseAuth.instance.currentUser!.uid;
-
-    firestore.collection('Users').doc(uid).snapshots().listen((userDoc) {
-      if (userDoc.exists) {
-        setState(() {
-          username = userDoc['name'] ?? "User";
-        });
-      } else {
-        setState(() {
-          username = "User"; // Default username if document doesn't exist
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,28 +78,32 @@ class _HomePageState extends State<HomePage> {
                             // The TextColumn for two lines of text
                             Flexible(
                               flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Hello $username',
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w400,
+                              child:
+                                  Consumer<UserProvider>(builder: (context, provider, child) {
+                                    final username = provider.username ?? 'User';
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hello $username',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 5.h),
-                                  Text(
-                                    'How may I help you today?',
-                                    style: TextStyle(
-                                      fontSize: 24.sp,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w600,
+                                    SizedBox(height: 5.h),
+                                    Text(
+                                      'How may I help you today?',
+                                      style: TextStyle(
+                                        fontSize: 24.sp,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                );
+                              }),
                             ),
                             // Image spanning both lines
                             Flexible(

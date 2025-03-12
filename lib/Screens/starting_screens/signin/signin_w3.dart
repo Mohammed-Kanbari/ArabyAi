@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// Import SharedPreferences
-import 'package:my_araby_ai/widgets/signin/check_email.dart';
+import 'package:my_araby_ai/Screens/starting_screens/signin/check_email.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
 
 class SingupW3 extends StatefulWidget {
   const SingupW3({super.key});
@@ -15,8 +15,8 @@ class SingupW3 extends StatefulWidget {
 class _SingupW3State extends State<SingupW3> {
   final TextEditingController _usernameController = TextEditingController();
   final FocusNode _usernameFocusNode = FocusNode();
+  final _formKey = GlobalKey<FormState>();
   String _hintText = 'Username';
-  
 
   @override
   void initState() {
@@ -35,29 +35,59 @@ class _SingupW3State extends State<SingupW3> {
     super.dispose();
   }
 
-   Future<void> _saveUsernameToFirestore(String username) async {
-    try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-          String uid = FirebaseAuth.instance.currentUser!.uid;
+  Future<void> _saveUsername() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      String username = _usernameController.text.trim();
+      String uid = context.read<UserProvider>().firebaseUid ?? '';
 
-      // Assuming you want to save the username under a collection 'users'
-      await firestore.collection('Users').doc(uid).set({
-        'name': username,
-        'created_at': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-    } catch (e) {
-      print("Error saving username: $e");
+      if (uid.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('User ID not found. Please sign up again.',
+                  style: TextStyle(fontSize: 14.sp))),
+        );
+        return;
+      }
+
+      // Store in UserProvider
+      UserProvider provider = context.read<UserProvider>();
+      provider.setUsername(username);
+      provider.setPhone('+971 123456789'); // Default phone
+      provider.setProfilePictureUrl(null); // Default profile picture
+
+      // Update Firestore
+      try {
+        await FirebaseFirestore.instance.collection('Users').doc(uid).update({
+          'name': username,
+          'phone': '+971 123456789',
+          'profilePictureUrl': null,
+          'created_at': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        print("Error saving username: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to save username: $e',
+                  style: TextStyle(fontSize: 14.sp))),
+        );
+        return;
+      }
+
+      // Navigate to CheckEmail
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) =>
+                const CheckEmail(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+          (route) => false,
+        );
+      }
     }
   }
-
-  // Function to save username to SharedPreferences
-  // Future<void> _saveUsername(String username) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   prefs.setString('username', username); // Save the username
-  // }
-
-    final _formKey = GlobalKey<FormState>();
-
 
   @override
   Widget build(BuildContext context) {
@@ -110,13 +140,16 @@ class _SingupW3State extends State<SingupW3> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue, width: 2),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           suffixIcon: IconButton(
-                            icon: Icon(Icons.replay_outlined, color: Colors.blue),
+                            icon:
+                                Icon(Icons.replay_outlined, color: Colors.blue),
                             onPressed: () {
-                              _usernameController.clear(); // Reset username field
+                              _usernameController
+                                  .clear(); // Reset username field
                             },
                           ),
                         ),
@@ -142,22 +175,7 @@ class _SingupW3State extends State<SingupW3> {
                         ),
                       ),
                       child: MaterialButton(
-                        onPressed: () async {
-                          String username = _usernameController.text.trim();
-                          // Save username locally when 'Done' is pressed
-                          await _saveUsernameToFirestore(username);
-
-                          if (_formKey.currentState?.validate() ?? false) {
-                             Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CheckEmail()),
-                            (route) => false,
-                          );
-                          }
-
-                         
-                        },
+                        onPressed: _saveUsername,
                         minWidth: double.infinity,
                         height: 45.h,
                         child: Text(

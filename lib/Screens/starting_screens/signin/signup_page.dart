@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:my_araby_ai/widgets/signin/signin_w2.dart';
+import 'package:my_araby_ai/Screens/starting_screens/signin/signin_w2.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
+
 
 class Singup extends StatefulWidget {
   const Singup({super.key});
@@ -36,16 +39,12 @@ class _SingupState extends State<Singup> {
     if (_formKey.currentState?.validate() ?? false) {
       // Get the email entered by the user
       String email = _emailController.text.trim();
+      context.read<UserProvider>().setEmail(email);
 
-      // Here, you can optionally save the email locally or proceed to the next page.
-      
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      // await prefs.setString('user_email', email);
-      // For now, just move to the next page (password page).
       Navigator.push(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation1, animation2) => SingupW2(email: email),  // Pass email to next page
+          pageBuilder: (context, animation1, animation2) => SingupW2(),  // Pass email to next page
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
         ),
