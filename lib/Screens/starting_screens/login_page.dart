@@ -40,8 +40,10 @@ class _LoginState extends State<Login> {
             provider.setEmail(user.email ?? '');
             provider.setPassword(_passwordController.text.trim(), firebaseUid: user.uid);
             provider.setUsername(userDoc.exists ? userDoc['name'] ?? 'User' : 'User');
-            provider.setPhone(userDoc.exists ? userDoc['phone'] ?? '+971 123456789' : '+971 123456789');
+            provider.setPhone(userDoc.exists ? userDoc['phone'] ?? '123456789' : '123456789');
             provider.setProfilePictureUrl(userDoc.exists ? userDoc['profilePictureUrl'] : null);
+            provider.setOccupation(userDoc['occupation'] ?? '');
+            provider.setDob(userDoc['dob'] ?? '');
           }
           Navigator.pushAndRemoveUntil(
             context,
@@ -58,57 +60,68 @@ class _LoginState extends State<Login> {
   }
 
   // Sign-in method using Google
-  Future<void> _signInWithGoogle() async {
+  Future<void> _signInWithGoogle(BuildContext context) async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Google sign-in was canceled.')));
-        return;
-      }
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User canceled
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       User? user = userCredential.user;
 
       if (user != null) {
+        // Check if user exists in Firestore, create if not
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
         UserProvider provider = context.read<UserProvider>();
-        if (provider.username == null || provider.firebaseUid != user.uid) {
-          DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
-          if (!userDoc.exists) {
-            await _firestore.collection('Users').doc(user.uid).set({
-              'email': user.email,
-              'name': googleUser.displayName ?? 'User',
-              'phone': '+971 123456789',
-              'occupation': null,
-              'dob': null,
-              'created_at': FieldValue.serverTimestamp(),
-            });
-            provider.setEmail(user.email ?? '');
-            provider.setPassword('', firebaseUid: user.uid);
-            provider.setUsername(googleUser.displayName ?? 'User');
-            provider.setPhone('+971 123456789');
-            provider.setProfilePictureUrl(null);
-          } else {
-            provider.setEmail(user.email ?? '');
-            provider.setPassword('', firebaseUid: user.uid);
-            provider.setUsername(userDoc['name'] ?? 'User');
-            provider.setPhone(userDoc['phone'] ?? '+971 123456789');
-            provider.setProfilePictureUrl(userDoc['profilePictureUrl']);
-          }
+
+        if (!userDoc.exists) {
+          // New user, create document
+          await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+            'email': user.email,
+            'name': user.displayName ?? 'User', // Use Google displayName as default
+            'phone': '+971 123456789', // Default phone
+            'profilePictureUrl': user.photoURL, // Google profile picture if available
+            'occupation': '',
+            'dob': '',
+            'created_at': FieldValue.serverTimestamp(),
+          });
+          provider.setEmail(user.email ?? '');
+          provider.setPassword('', firebaseUid: user.uid); // No password for Google Sign-In
+          provider.setUsername(user.displayName ?? 'User');
+          provider.setPhone('123456789');
+          provider.setProfilePictureUrl(user.photoURL);
+          provider.setOccupation('');
+          provider.setDob('');
+        } else {
+          // Existing user, update UserProvider with Firestore data
+          provider.setEmail(userDoc['email'] ?? user.email ?? '');
+          provider.setPassword('', firebaseUid: user.uid);
+          provider.setUsername(userDoc['name'] ?? 'User');
+          provider.setPhone(userDoc['phone'] ?? '123456789');
+          provider.setProfilePictureUrl(userDoc['profilePic']);
+          provider.setOccupation(userDoc['occupation'] ?? '');
+          provider.setDob(userDoc['dob'] ?? '');
         }
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
+
+
+        if (context.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign-In failed: $e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign-In failed: $e')));
+      }
     }
   }
 
@@ -375,7 +388,9 @@ class _LoginState extends State<Login> {
                                   width: 22.w,
                                 ),
                                 IconButton(
-                                  onPressed: _signInWithGoogle,
+                                  onPressed: () {
+                                    _signInWithGoogle(context);
+                                  },
                                   icon: Image.asset(
                                     'assets/images/googleLogo2.png',
                                     width: 40.w,

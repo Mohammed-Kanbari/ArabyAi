@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:my_araby_ai/Screens/main_screens/E-mails_page.dart';
 import 'package:my_araby_ai/Screens/main_screens/sm_main.dart';
@@ -9,8 +8,9 @@ import 'package:my_araby_ai/widgets/topBar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_araby_ai/widgets/type_of_content.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   // List of image paths
@@ -48,7 +48,35 @@ class HomePage extends StatelessWidget {
   ];
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final provider = context.read<UserProvider>();
+    print('HomePage initState - Pre-fetch Username: ${provider.username}');
+    if (provider.username == null ||
+        provider.firebaseUid != auth.FirebaseAuth.instance.currentUser?.uid) {
+      await provider.fetchUserData();
+    }
+    print('HomePage initState - Post-fetch Username: ${provider.username}');
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -78,9 +106,9 @@ class HomePage extends StatelessWidget {
                             // The TextColumn for two lines of text
                             Flexible(
                               flex: 2,
-                              child:
-                                  Consumer<UserProvider>(builder: (context, provider, child) {
-                                    final username = provider.username ?? 'User';
+                              child: Consumer<UserProvider>(
+                                  builder: (context, provider, child) {
+                                final username = provider.username ?? 'User';
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -147,16 +175,17 @@ class HomePage extends StatelessWidget {
                       itemBuilder: (BuildContext context, int index) {
                         // Ensure we pass the correct page to navigate to based on the index
                         return ImageTextButton(
-                          imagePath:
-                              imagePaths[index], // Pass image path dynamically
-                          text: texts[index], // Pass text dynamically
+                          imagePath: HomePage
+                              .imagePaths[index], // Pass image path dynamically
+                          text: HomePage.texts[index], // Pass text dynamically
                           onTap: () {
                             // Navigate to the corresponding page based on the index
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => pages[index %
-                                    pages.length], // Use modulo for wrapping
+                                builder: (context) => HomePage.pages[index %
+                                    HomePage.pages
+                                        .length], // Use modulo for wrapping
                               ),
                             );
                           },

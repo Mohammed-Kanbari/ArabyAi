@@ -8,7 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:my_araby_ai/core/constatns.dart';
 import 'package:my_araby_ai/core/photo_link.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -20,110 +22,188 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   String? selectedNum = 'UAE +971';
 
-  final List<String> _Numbers = ['UAE +971', 'USA +01', 'UK +671'];
+  final List<String> _Numbers = ['UAE +971', 'USA +1', 'UK +44'];
 
   // Variables to hold username and email
-  TextEditingController _emailController = TextEditingController();
+  late TextEditingController _emailController;
 
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
-  TextEditingController _occupationController = TextEditingController();
-  TextEditingController _DOBnController = TextEditingController();
+  late TextEditingController _usernameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _occupationController;
+  late TextEditingController _dobController;
 
   String? _profileImageUrl;
 
   @override
   void initState() {
     super.initState();
-    // Get the user data from Firestore when the profile page is loaded
-    _getUserData();
+    _emailController = TextEditingController();
+    _usernameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _occupationController = TextEditingController();
+    _dobController = TextEditingController();
+
+    _loadUserDate();
   }
 
-  // Function to get user data from Firestore
-  Future<void> _getUserData() async {
-    // Get the current user's ID
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _occupationController.dispose();
+    _dobController.dispose();
+    super.dispose();
+  }
+
+  // Load date from UserProvider, fallback to Firestore if needed
+  void _loadUserDate() {
+    UserProvider provider = context.read<UserProvider>();
     User? user = FirebaseAuth.instance.currentUser;
 
-    if (user != null) {
-      // Fetch the data from Firestore using the user's ID
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .get();
+    if (provider.username != null && provider.firebaseUid == user?.uid) {
+      setState(() {
+        _emailController.text = provider.email ?? '';
+        _usernameController.text = provider.username ?? '';
+        _updatePhoneFields(provider.phone ?? '+971123456789');
+        _occupationController.text =
+            provider.occupation ?? ''; 
+        _dobController.text =
+            provider.dob ?? ''; 
+        _profileImageUrl = provider.profilePictureUrl;
+      });
+    }
+    // Fetch from Firestore if UserProvider is incomplete
+    _fetchUserDataFromFirestore();
+  }
 
-      if (userDoc.exists) {
-        setState(() {
-          _usernameController.text = userDoc['name'];
-          _emailController.text = userDoc['email'];
-          _phoneController.text = userDoc['phone'];
-          _occupationController.text = userDoc['occupation'];
-          _DOBnController.text = userDoc['dob'];
-          _profileImageUrl = userDoc['profilePic'];
-        });
+  void _updatePhoneFields(String phone) {
+    if (phone.startsWith('+971')) {
+      selectedNum = 'UAE +971';
+      _phoneController.text = phone.replaceFirst('+971', '');
+    } else if (phone.startsWith('+1')) {
+      selectedNum = 'USA +1';
+      _phoneController.text = phone.replaceFirst('+1', '');
+    } else if (phone.startsWith('+44')) {
+      selectedNum = 'UK +44';
+      _phoneController.text = phone.replaceFirst('+44', '');
+    } else {
+      selectedNum = 'UAE +971'; // Default
+      _phoneController.text = phone;
+    }
+  }
+
+  Future<void> _fetchUserDataFromFirestore() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          UserProvider provider = context.read<UserProvider>();
+          setState(() {
+            _emailController.text = userDoc['email'] ?? provider.email ?? '';
+            _usernameController.text =
+                userDoc['name'] ?? provider.username ?? '';
+            _updatePhoneFields(
+                userDoc['phone'] ?? provider.phone ?? '+971 123456789');
+            _occupationController.text = userDoc['occupation'] ?? '';
+            _dobController.text = userDoc['dob'] ?? '';
+            _profileImageUrl =
+                userDoc['profilePictureUrl'] ?? provider.profilePictureUrl;
+          });
+          // Update UserProvider with Firestore data
+          provider.setEmail(_emailController.text);
+          provider.setUsername(_usernameController.text);
+          provider.setPhone(_phoneController.text);
+          provider.setProfilePictureUrl(_profileImageUrl);
+          provider.setOccupation(_occupationController.text);
+          provider.setDob(_dobController.text);
+          // Add new fields to UserProvider if needed (see below)
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load profile: $e')));
       }
     }
   }
 
   Future<void> _pickAndSaveImageLocally() async {
-  final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-  if (pickedFile != null) {
-    File imageFile = File(pickedFile.path);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName =
+            '${FirebaseAuth.instance.currentUser!.uid}_profile_pic.jpg';
+        final localPath = '${directory.path}/$fileName';
+        await imageFile.copy(localPath);
 
-    try {
-      // Get the app's document directory to save the image locally
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName =
-          '${FirebaseAuth.instance.currentUser!.uid}_profile_pic.jpg';
-      final localPath = '${directory.path}/$fileName';
+        UserProvider provider = context.read<UserProvider>();
+        provider.setProfilePictureUrl(localPath);
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({'profilePictureUrl': localPath});
 
-      // Save the image locally
-      final File savedImage = await imageFile.copy(localPath);
-
-      // Save the local file path to Firestore
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({'profilePic': localPath});
-
-      // Fetch updated user data to make sure state reflects Firestore changes
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get();
-
-      if (userDoc.exists) {
         setState(() {
-          _profileImageUrl = userDoc['profilePic']; // Use the updated value from Firestore
+          _profileImageUrl = localPath;
         });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Profile picture updated')));
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to save image: $e')));
       }
-
-      // Show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile picture updated locally')));
-    } catch (e) {
-      // Handle any errors that occur during the image saving process
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save image locally: $e')));
     }
   }
-}
-
 
   Future<void> _saveChanges() async {
     User? user = FirebaseAuth.instance.currentUser;
+
     if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .update({
-        'name': _usernameController.text,
-        'phone': _phoneController.text,
-        'occupation': _occupationController.text,
-        'dob': _DOBnController.text,
-        'profilePic': _profileImageUrl, // Save the profile image path
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile updated successfully!')));
+      String countryCode = selectedNum!.split(' ').last; // e.g., "+971" from "UAE +971"
+      String fullPhoneNumber = _phoneController.text.isNotEmpty
+          ? '$countryCode${_phoneController.text}'
+          : _phoneController.text;
+
+      if (_phoneController.text.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(_phoneController.text)) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Phone number must contain only digits')));
+        return;
+      }
+
+      try {
+        // Update Firestore
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({
+          'name': _usernameController.text,
+          'phone': fullPhoneNumber,
+          'occupation': _occupationController.text,
+          'dob': _dobController.text,
+          'profilePictureUrl': _profileImageUrl,
+        });
+
+        // Update UserProvider
+        UserProvider provider = context.read<UserProvider>();
+        provider.setUsername(_usernameController.text);
+        provider.setPhone(fullPhoneNumber);
+        provider.setProfilePictureUrl(_profileImageUrl);
+        provider.setOccupation(_occupationController.text);
+        provider.setDob(_dobController.text);
+        // Add occupation and dob to UserProvider if needed (see below)
+
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Profile updated successfully!')));
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update profile: $e')));
+      }
     }
   }
 
@@ -489,44 +569,58 @@ class _ProfileState extends State<Profile> {
                             ),
                             kGap10,
                             TextField(
-                              controller: _DOBnController,
+                              controller: _dobController,
                               style: TextStyle(
                                   fontSize: 16.sp, fontFamily: 'Poppins'),
                               textAlignVertical: TextAlignVertical.top,
                               maxLines: null,
                               expands: false,
                               decoration: InputDecoration(
-                                  suffixIcon: Icon(
-                                    size: 24.sp,
-                                    Icons.calendar_today_outlined,
+                                suffixIcon: Icon(
+                                  size: 24.sp,
+                                  Icons.calendar_today_outlined,
+                                  color:
+                                      const Color.fromARGB(255, 183, 182, 182),
+                                ),
+                                hintText: 'DD/MM/YYYY',
+                                hintStyle: TextStyle(
                                     color: const Color.fromARGB(
                                         255, 183, 182, 182),
-                                  ),
-                                  hintText: 'DD/MM/YYYY',
-                                  hintStyle: TextStyle(
+                                    fontSize: 14.sp),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
                                       color: const Color.fromARGB(
-                                          255, 183, 182, 182),
-                                      fontSize: 14.sp),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                        color: const Color.fromARGB(
-                                            255, 180, 179, 179),
-                                        width: 1),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                        color: const Color.fromARGB(
-                                            255, 195, 194, 194)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                        color: Colors.blueAccent, width: 1),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12)),
+                                          255, 180, 179, 179),
+                                      width: 1),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: const Color.fromARGB(
+                                          255, 195, 194, 194)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: Colors.blueAccent, width: 1),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                              ),
+                              readOnly: true, // Prevents keyboard from showing
+                              onTap: () async {
+                                DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(1900),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) {
+                                  _dobController.text =
+                                      "${picked.day}/${picked.month}/${picked.year}";
+                                }
+                              },
                             ),
                             Spacer(),
                             kGap40,

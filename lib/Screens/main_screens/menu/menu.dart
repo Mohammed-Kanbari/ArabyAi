@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +15,26 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_araby_ai/providers/user_provider.dart';
 
-class Menu extends StatelessWidget {
+class Menu extends StatefulWidget {
   const Menu({super.key});
+
+  @override
+  State<Menu> createState() => _MenuState();
+}
+
+class _MenuState extends State<Menu> {
+  @override
+  void initState() {
+    super.initState();
+    _ensureUserData();
+  }
+
+  Future<void> _ensureUserData() async {
+    UserProvider provider = context.read<UserProvider>();
+    if (provider.username == null || provider.firebaseUid != auth.FirebaseAuth.instance.currentUser?.uid) {
+      await provider.fetchUserData();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +82,17 @@ class Menu extends StatelessWidget {
                       String phone = provider.phone ?? '+971 123456789';
                       String? profilePictureUrl = provider.profilePictureUrl;
 
-                      if (provider.username == null ||
-                          provider.firebaseUid !=
-                              auth.FirebaseAuth.instance.currentUser?.uid) {
-                        _fetchUserData(context);
+                      String displayPhone = phone;
+                      String countryCode = '';
+                      if (phone.startsWith('+971')) {
+                        countryCode = '+971';
+                        displayPhone = phone.replaceFirst('+971', '');
+                      } else if (phone.startsWith('+1')) {
+                        countryCode = '+1';
+                        displayPhone = phone.replaceFirst('+1', '');
+                      } else if (phone.startsWith('+44')) {
+                        countryCode = '+44';
+                        displayPhone = phone.replaceFirst('+44', '');
                       }
 
                       return Column(
@@ -96,11 +122,17 @@ class Menu extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         color: const Color(0xff7c94b6),
                                         image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/images/Rectangle.png'),
+                                          image: profilePictureUrl != null &&
+                                                  File(profilePictureUrl)
+                                                      .existsSync()
+                                              ? FileImage(
+                                                  File(profilePictureUrl))
+                                              : const AssetImage(
+                                                      'assets/images/Rectangle.png')
+                                                  as ImageProvider,
                                           fit: BoxFit.cover,
                                         ),
-                                        borderRadius: BorderRadius.all(
+                                        borderRadius: const BorderRadius.all(
                                             Radius.elliptical(108, 108)),
                                       ),
                                     ),
@@ -116,7 +148,7 @@ class Menu extends StatelessWidget {
                                 ),
                                 kGap5,
                                 Text(
-                                  phone,
+                                  '$countryCode $displayPhone',
                                   style: TextStyle(
                                       fontSize: 16.sp,
                                       fontFamily: 'Poppins',
@@ -246,28 +278,5 @@ class Menu extends StatelessWidget {
     );
   }
 
-  Future<void> _fetchUserData(BuildContext context) async {
-    auth.User? user = auth.FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .get();
-        UserProvider provider = context.read<UserProvider>();
-        provider.setEmail(user.email ?? '');
-        provider.setPassword('',
-            firebaseUid: user.uid); // Password not needed here
-        provider
-            .setUsername(userDoc.exists ? userDoc['name'] ?? 'User' : 'User');
-        provider.setPhone(userDoc.exists
-            ? userDoc['phone'] ?? '+971 123456789'
-            : '+971 123456789');
-        provider.setProfilePictureUrl(
-            userDoc.exists ? userDoc['profilePictureUrl'] : null);
-      } catch (e) {
-        debugPrint('Error fetching user data: $e');
-      }
-    }
-  }
+
 }

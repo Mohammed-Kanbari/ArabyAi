@@ -52,15 +52,19 @@ class _SingupW3State extends State<SingupW3> {
       // Store in UserProvider
       UserProvider provider = context.read<UserProvider>();
       provider.setUsername(username);
-      provider.setPhone('+971 123456789'); // Default phone
+      provider.setPhone('123456789'); // Default phone
       provider.setProfilePictureUrl(null); // Default profile picture
+      provider.setOccupation('');
+      provider.setDob('');
 
       // Update Firestore
       try {
         await FirebaseFirestore.instance.collection('Users').doc(uid).update({
           'name': username,
-          'phone': '+971 123456789',
+          'phone': '123456789',
           'profilePictureUrl': null,
+          'occupation': '',
+          'dob': '',
           'created_at': FieldValue.serverTimestamp(),
         });
       } catch (e) {
