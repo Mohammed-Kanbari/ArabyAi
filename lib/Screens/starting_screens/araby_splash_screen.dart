@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_araby_ai/Screens/main_screens/HomePage.dart';
 import 'package:my_araby_ai/Screens/starting_screens/welcome.dart';
+import 'package:my_araby_ai/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class Araby_SC extends StatefulWidget {
   const Araby_SC({super.key});
@@ -16,14 +20,37 @@ class _Araby_SCState extends State<Araby_SC> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    // Navigate to the WelcomePage after 3 seconds
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomePage()),
-      );
-    });
+    //Check if the user is already logged in
+    _navigateBasedOnAuthState();
   }
+
+  Future<void> _navigateBasedOnAuthState() async {
+    
+    await Future.delayed(const Duration(seconds: 3));
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if(user != null) {
+      // Optional: Sync UserProvider data if needed
+      UserProvider provider = Provider.of<UserProvider>(context, listen: false);
+      await provider.fetchUserData(); // Ensure user data is loaded
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    } else {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomePage()),
+        );
+      }
+    }
+  }
+    
+
+  
 
   @override
   void dispose() {
